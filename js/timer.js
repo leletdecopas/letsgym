@@ -104,9 +104,9 @@ const Timer = {
         // Custom time button
         document.getElementById('btn-custom-timer').addEventListener('click', () => {
             const input = document.getElementById('timer-custom-input');
-            const time = parseInt(input.value);
-            if (time && time >= 5 && time <= 600) {
-                this.start(time);
+            const minutes = parseInt(input.value);
+            if (minutes && minutes >= 1 && minutes <= 5) {
+                this.start(minutes * 60);
             }
         });
 
@@ -120,6 +120,11 @@ const Timer = {
         // Stop button
         document.getElementById('btn-stop-timer').addEventListener('click', () => {
             this.stop();
+        });
+
+        // Reset button
+        document.getElementById('btn-reset-timer').addEventListener('click', () => {
+            this.reset();
         });
     },
 
@@ -169,6 +174,27 @@ const Timer = {
         }
         this.isRunning = false;
         this.elements.timerCircle.classList.remove('running');
+    },
+
+    reset() {
+        if (this.interval) {
+            clearInterval(this.interval);
+            this.interval = null;
+        }
+        this.timeRemaining = 0;
+        this.totalTime = 0;
+        this.isRunning = false;
+        this.currentExerciseId = null;
+
+        this.elements.timerCircle.classList.remove('running', 'finished');
+        this.updateDisplay();
+
+        if (this.elements.timerExerciseName) {
+            this.elements.timerExerciseName.textContent = 'Descanso';
+        }
+        if (this.elements.timerSetInfo) {
+            this.elements.timerSetInfo.textContent = '';
+        }
     },
 
     finish() {

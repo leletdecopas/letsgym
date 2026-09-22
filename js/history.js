@@ -30,10 +30,12 @@ const History = {
         const emptyState = document.getElementById('history-empty');
         const filter = document.getElementById('history-filter-workout').value;
 
-        let history = Storage.getHistory();
+        const allHistory = Storage.getHistory();
+        const prKeys = this.computePRKeys(allHistory);
 
+        let history = allHistory;
         if (filter !== 'all') {
-            history = history.filter(entry => entry.workoutId === filter);
+            history = allHistory.filter(entry => entry.workoutId === filter);
         }
 
         if (history.length === 0) {
@@ -43,8 +45,6 @@ const History = {
         }
 
         emptyState.classList.add('hidden');
-
-        const prKeys = this.computePRKeys(history);
 
         const muscleNames = {
             chest: 'Peito',
@@ -105,14 +105,15 @@ const History = {
 
         sorted.forEach(entry => {
             (entry.exercises || []).forEach(ex => {
-                const max = Storage.getExerciseMaxWeight(ex);
+                const max = Storage.getExerciseMaxWeight(ex, false);
                 if (max <= 0) return;
-                const prev = bests[ex.name] || 0;
+                const nameKey = String(ex.name || '').toLowerCase().trim();
+                const prev = bests[nameKey] || 0;
                 if (prev > 0 && max > prev) {
                     keys.add(entry.id + ':' + ex.name);
                 }
                 if (max > prev) {
-                    bests[ex.name] = max;
+                    bests[nameKey] = max;
                 }
             });
         });

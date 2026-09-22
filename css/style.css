@@ -78,7 +78,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 1rem 1.25rem;
+    padding: calc(1rem + env(safe-area-inset-top, 0px)) 1.25rem 1rem;
     background: rgba(10, 10, 15, 0.85);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
@@ -128,6 +128,44 @@ body {
 
 .header-action:hover svg {
     color: var(--accent);
+}
+
+/* Home / Tela de Início Button */
+.btn-home {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text-secondary);
+    font-size: 0.75rem;
+    font-weight: 600;
+    font-family: var(--font);
+    cursor: pointer;
+    padding: 0.45rem 0.7rem;
+    transition: var(--transition);
+}
+
+.btn-home svg {
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+}
+
+.btn-home:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: var(--accent-soft);
+}
+
+@media (max-width: 380px) {
+    .btn-home-label {
+        display: none;
+    }
+    .btn-home {
+        padding: 0.45rem;
+    }
 }
 
 /* Back Button */
@@ -821,6 +859,18 @@ body {
     transform: scale(1.02);
 }
 
+.btn-reset {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    color: var(--text-primary);
+}
+
+.btn-reset:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    transform: scale(1.02);
+}
+
 .btn-back-workout {
     background: var(--bg-elevated);
     border: 1px solid var(--border);
@@ -1074,7 +1124,7 @@ body {
     align-items: center;
     justify-content: center;
     min-height: 100dvh;
-    padding: 2rem;
+    padding: calc(2rem + env(safe-area-inset-top, 0px)) 2rem 2rem;
     text-align: center;
     position: relative;
     overflow: hidden;
@@ -1525,7 +1575,7 @@ body {
     align-items: center;
     justify-content: center;
     min-height: 100dvh;
-    padding: 2rem;
+    padding: calc(2rem + env(safe-area-inset-top, 0px)) 2rem 2rem;
     text-align: center;
     position: relative;
     overflow: hidden;

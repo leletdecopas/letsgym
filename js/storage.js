@@ -270,18 +270,23 @@ const Storage = {
         this.set(this.KEYS.HISTORY, []);
     },
 
-    getExerciseMaxWeight(ex) {
+    getExerciseMaxWeight(ex, onlyCompleted = true) {
+        const toNumber = (w) => {
+            const n = typeof w === 'number' ? w : parseFloat(w);
+            return Number.isFinite(n) ? n : 0;
+        };
+
         if (Array.isArray(ex.sets)) {
             let max = 0;
             ex.sets.forEach(s => {
-                if (s.completed && typeof s.weight === 'number' && s.weight > max) {
-                    max = s.weight;
-                }
+                if (onlyCompleted && !s.completed) return;
+                const w = toNumber(s.weight);
+                if (w > max) max = w;
             });
             return max;
         }
         if (typeof ex.sets === 'number') {
-            return typeof ex.weight === 'number' ? ex.weight : 0;
+            return toNumber(ex.weight);
         }
         return 0;
     },
@@ -292,7 +297,7 @@ const Storage = {
         this.getHistory().forEach(entry => {
             (entry.exercises || []).forEach(ex => {
                 if (String(ex.name || '').toLowerCase().trim() !== name) return;
-                const max = this.getExerciseMaxWeight(ex);
+                const max = this.getExerciseMaxWeight(ex, false);
                 if (max > best) best = max;
             });
         });
@@ -302,7 +307,7 @@ const Storage = {
     getPRsForSession(exercises) {
         const prs = [];
         exercises.forEach(ex => {
-            const current = this.getExerciseMaxWeight(ex);
+            const current = this.getExerciseMaxWeight(ex, true);
             if (current <= 0) return;
             const previous = this.getBestWeight(ex.name);
             if (previous > 0 && current > previous) {

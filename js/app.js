@@ -31,6 +31,11 @@ const App = {
             Workout.showCreateWorkoutModal();
         });
 
+        // Home / welcome screen button
+        document.getElementById('btn-home').addEventListener('click', () => {
+            this.showScreen('welcome');
+        });
+
         // Bottom navigation
         document.querySelectorAll('.nav-item').forEach(item => {
             item.addEventListener('click', () => {

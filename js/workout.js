@@ -377,6 +377,7 @@ const Workout = {
 
     editSetField(exerciseId, setId, field, element) {
         const currentValue = element.textContent.trim().replace('kg', '').trim();
+        const previousValue = parseFloat(currentValue);
         const input = document.createElement('input');
         input.type = 'number';
         input.value = currentValue;
@@ -391,7 +392,9 @@ const Workout = {
 
         const save = () => {
             let value = parseFloat(input.value);
-            if (isNaN(value) || value < 0) value = currentValue;
+            if (isNaN(value) || value < 0) {
+                value = Number.isFinite(previousValue) ? previousValue : 0;
+            }
             Storage.updateSet(this.currentWorkoutId, exerciseId, setId, { [field]: value });
             this.renderExercises();
         };

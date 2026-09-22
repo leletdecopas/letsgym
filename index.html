@@ -17,7 +17,7 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <link rel="stylesheet" href="css/style.css?v=4">
+    <link rel="stylesheet" href="css/style.css?v=5">
 </head>
 <body>
     <div id="app">
@@ -55,6 +55,13 @@
                     </svg>
                     <span class="app-logo-text">LetsGym</span>
                 </div>
+                <button id="btn-home" class="btn-home" title="Tela de Início">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                        <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                    </svg>
+                    <span class="btn-home-label">Tela de Início</span>
+                </button>
             </header>
 
             <div class="main-content">
@@ -150,8 +157,8 @@
                 <div class="timer-custom">
                     <label for="timer-custom-input">Ou digite o tempo</label>
                     <div class="timer-custom-input-group">
-                        <input type="number" id="timer-custom-input" min="5" max="600" value="90" placeholder="Segundos">
-                        <span class="input-suffix">seg</span>
+                        <input type="number" id="timer-custom-input" min="1" max="5" value="2" placeholder="Minutos">
+                        <span class="input-suffix">min</span>
                         <button id="btn-custom-timer" class="btn-primary">Iniciar</button>
                     </div>
                 </div>
@@ -162,6 +169,13 @@
                             <rect x="6" y="6" width="12" height="12" rx="2"></rect>
                         </svg>
                         Parar
+                    </button>
+                    <button id="btn-reset-timer" class="btn-reset">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="1 4 1 10 7 10"></polyline>
+                            <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+                        </svg>
+                        Zerar
                     </button>
                 </div>
             </div>
@@ -370,11 +384,11 @@
         </div>
     </div>
 
-    <script src="js/storage.js?v=4"></script>
-    <script src="js/bodyMap.js?v=4"></script>
-    <script src="js/timer.js?v=4"></script>
-    <script src="js/workout.js?v=4"></script>
-    <script src="js/history.js?v=4"></script>
-    <script src="js/app.js?v=4"></script>
+    <script src="js/storage.js?v=5"></script>
+    <script src="js/bodyMap.js?v=5"></script>
+    <script src="js/timer.js?v=5"></script>
+    <script src="js/workout.js?v=5"></script>
+    <script src="js/history.js?v=5"></script>
+    <script src="js/app.js?v=5"></script>
 </body>
 </html>

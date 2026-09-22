@@ -135,6 +135,10 @@ const Workout = {
     renderExerciseCard(exercise) {
         const completedCount = exercise.sets.filter(s => s.completed).length;
         const totalCount = exercise.sets.length;
+        const bestWeight = Storage.getExerciseMaxWeight(exercise);
+        const previousBest = bestWeight > 0 ? Storage.getBestWeight(exercise.name) : 0;
+        const isPR = previousBest > 0 && bestWeight > previousBest;
+        const prDelta = isPR ? Math.round((bestWeight - previousBest) * 100) / 100 : 0;
 
         const setsRows = exercise.sets.map((set, index) => {
             const typeInfo = this.setTypes[set.type] || this.setTypes.normal;
@@ -163,6 +167,14 @@ const Workout = {
                 <div class="exercise-header">
                     <div class="exercise-title-row">
                         <span class="exercise-name">${exercise.name}</span>
+                        ${isPR ? `
+                            <span class="pr-trophy" title="Novo recorde! +${prDelta}kg vs anterior">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0V4z"></path>
+                                    <path d="M17 5h2a2 2 0 0 1 0 4h-2M7 5H5a2 2 0 0 0 0 4h2"></path>
+                                </svg>
+                            </span>
+                        ` : ''}
                         <span class="exercise-muscle-tag">${this.muscleNames[exercise.muscle] || exercise.muscle}</span>
                     </div>
                     <div class="exercise-progress">
@@ -531,6 +543,9 @@ const Workout = {
             }))
         }));
 
+        // Reset all sets so the workout is fresh next time
+        const sessionPRs = Storage.getPRsForSession(exercises);
+
         Storage.addHistoryEntry({
             workoutId: this.currentWorkoutId,
             workoutName: workout.name,
@@ -538,20 +553,38 @@ const Workout = {
             exercises: historyExercises
         });
 
-        // Reset all sets so the workout is fresh next time
         Storage.resetWorkoutSets(this.currentWorkoutId);
 
         this.hideFinishModal();
-        this.showCompleteScreen(workout.name, muscles);
+        this.showCompleteScreen(workout.name, muscles, sessionPRs);
     },
 
-    showCompleteScreen(workoutName, muscles) {
+    showCompleteScreen(workoutName, muscles, sessionPRs = []) {
         document.getElementById('complete-workout-name').textContent = workoutName;
 
         const musclesList = document.getElementById('complete-muscles-list');
         musclesList.innerHTML = muscles.map(m =>
             `<span class="muscle-tag">${this.muscleNames[m] || m}</span>`
         ).join('');
+
+        const prContainer = document.getElementById('complete-prs');
+        const prList = document.getElementById('complete-prs-list');
+        if (sessionPRs.length > 0) {
+            prList.innerHTML = sessionPRs.map(pr => `
+                <div class="pr-item">
+                    <svg class="pr-item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0V4z"></path>
+                        <path d="M17 5h2a2 2 0 0 1 0 4h-2M7 5H5a2 2 0 0 0 0 4h2"></path>
+                    </svg>
+                    <span class="pr-item-name">${pr.name}</span>
+                    <span class="pr-item-weight">${pr.weight}kg <span class="pr-item-delta">+${pr.delta}kg</span></span>
+                </div>
+            `).join('');
+            prContainer.classList.remove('hidden');
+        } else {
+            prContainer.classList.add('hidden');
+            prList.innerHTML = '';
+        }
 
         BodyMap.mount('complete-body-map-container', muscles);
 
@@ -628,17 +661,16 @@ const Workout = {
         App.showToast('Treino excluido');
     },
 
-    getActiveMusclesForToday() {
+    getActiveMusclesForWeek() {
         const history = Storage.getHistory();
-        const today = new Date().toDateString();
+        const weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
 
-        const todayEntries = history.filter(entry => {
-            const entryDate = new Date(entry.date).toDateString();
-            return entryDate === today;
+        const weekEntries = history.filter(entry => {
+            return new Date(entry.date).getTime() >= weekAgo;
         });
 
         const muscles = new Set();
-        todayEntries.forEach(entry => {
+        weekEntries.forEach(entry => {
             if (entry.muscles) {
                 entry.muscles.forEach(m => muscles.add(m));
             }

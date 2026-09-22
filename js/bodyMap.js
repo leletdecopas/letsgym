@@ -35,95 +35,101 @@ const BodyMap = {
 
     getSvgMarkup() {
         return `
-            <svg class="body-map-svg" viewBox="0 0 270 320" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Mapa muscular">
-                <!-- Frente -->
+            <svg class="body-map-svg" viewBox="0 0 270 320" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Mapa muscular da semana">
+                <!-- FRENTE -->
                 <g transform="translate(5, 0)">
-                    <!-- Cabeca -->
-                    <ellipse cx="80" cy="22" rx="18" ry="20" fill="#12121A" stroke="#2A2A35" stroke-width="1"/>
-
-                    <!-- Pescoco -->
-                    <rect x="73" y="40" width="14" height="10" rx="4" fill="#12121A" stroke="#2A2A35" stroke-width="1"/>
+                    <ellipse cx="80" cy="24" rx="16" ry="19" fill="#12121A" stroke="#2A2A35" stroke-width="1"/>
+                    <path d="M74 40v9c0 4 3 7 6 7s6-3 6-7v-9" fill="#12121A" stroke="#2A2A35" stroke-width="1"/>
 
                     <!-- Ombros -->
-                    <path class="muscle" data-muscle="shoulders" d="M38 55 Q42 50 55 52 L73 55 L73 72 L48 76 Q35 72 38 55Z"/>
-                    <path class="muscle" data-muscle="shoulders" d="M122 55 Q118 50 105 52 L87 55 L87 72 L112 76 Q125 72 122 55Z"/>
+                    <path class="muscle" data-muscle="shoulders" d="M47 60c3-8 11-13 21-12l6 4v20l-20 4c-9-1-13-8-7-16z"/>
+                    <path class="muscle" data-muscle="shoulders" d="M113 60c-3-8-11-13-21-12l-6 4v20l20 4c9-1 13-8 7-16z"/>
 
                     <!-- Peito -->
-                    <path class="muscle" data-muscle="chest" d="M48 76 L73 72 L80 72 L80 108 L48 112 Q40 108 48 76Z"/>
-                    <path class="muscle" data-muscle="chest" d="M112 76 L87 72 L80 72 L80 108 L112 112 Q120 108 112 76Z"/>
+                    <path class="muscle" data-muscle="chest" d="M53 76c7-4 15-6 21-5v6h6v34c-14 3-27 0-33-8-5-8-3-22 6-27z"/>
+                    <path class="muscle" data-muscle="chest" d="M107 76c-7-4-15-6-21-5v6h-6v34c14 3 27 0 33-8 5-8 3-22-6-27z"/>
 
-                    <!-- Bracos - Biceps -->
-                    <path class="muscle" data-muscle="biceps" d="M48 76 L35 80 L28 115 L32 140 L45 140 L48 112Z"/>
-                    <path class="muscle" data-muscle="biceps" d="M112 76 L125 80 L132 115 L128 140 L115 140 L112 112Z"/>
+                    <!-- Biceps -->
+                    <path class="muscle" data-muscle="biceps" d="M50 76c-8 3-14 12-17 24-2 10-2 22 1 32l14 2 5-28 4-24z"/>
+                    <path class="muscle" data-muscle="biceps" d="M110 76c8 3 14 12 17 24 2 10 2 22-1 32l-14 2-5-28-4-24z"/>
 
-                    <!-- Bracos - Triceps -->
-                    <path class="muscle" data-muscle="triceps" d="M32 140 L28 115 L24 145 L26 165 L42 165 L45 140Z"/>
-                    <path class="muscle" data-muscle="triceps" d="M128 140 L132 115 L136 145 L134 165 L118 165 L115 140Z"/>
+                    <!-- Antebraos -->
+                    <path d="M36 132c-3 10-4 22-2 32l2 10 12-2-1-40z" fill="#12121A" stroke="#2A2A35" stroke-width="1"/>
+                    <path d="M124 132c3 10 4 22 2 32l-2 10-12-2 1-40z" fill="#12121A" stroke="#2A2A35" stroke-width="1"/>
 
                     <!-- Maos -->
-                    <ellipse cx="32" cy="175" rx="8" ry="11" fill="#12121A" stroke="#2A2A35" stroke-width="1"/>
-                    <ellipse cx="128" cy="175" rx="8" ry="11" fill="#12121A" stroke="#2A2A35" stroke-width="1"/>
+                    <ellipse cx="40" cy="180" rx="7" ry="11" fill="#12121A" stroke="#2A2A35" stroke-width="1"/>
+                    <ellipse cx="120" cy="180" rx="7" ry="11" fill="#12121A" stroke="#2A2A35" stroke-width="1"/>
 
                     <!-- Abdomen -->
-                    <path class="muscle" data-muscle="abs" d="M48 112 L80 108 L80 165 L50 168 Q42 160 48 112Z"/>
-                    <path class="muscle" data-muscle="abs" d="M112 112 L80 108 L80 165 L110 168 Q118 160 112 112Z"/>
+                    <path class="muscle" data-muscle="abs" d="M53 111h27v54c-13 3-24 2-30-4-5-6-3-38 3-50z"/>
+                    <path class="muscle" data-muscle="abs" d="M107 111H80v54c13 3 24 2 30-4 5-6 3-38-3-50z"/>
 
                     <!-- Quadriceps -->
-                    <path class="muscle" data-muscle="quadriceps" d="M50 168 L80 165 L76 235 L48 240 Q40 225 50 168Z"/>
-                    <path class="muscle" data-muscle="quadriceps" d="M110 168 L80 165 L84 235 L112 240 Q120 225 110 168Z"/>
+                    <path class="muscle" data-muscle="quadriceps" d="M53 165c9 3 19 4 27 4v2c-1 24-5 52-9 66l-24 4c-7-18-6-52 6-76z"/>
+                    <path class="muscle" data-muscle="quadriceps" d="M107 165c-9 3-19 4-27 4v2c1 24 5 52 9 66l24 4c7-18 6-52-6-76z"/>
 
                     <!-- Joelhos -->
-                    <ellipse cx="58" cy="248" rx="10" ry="8" fill="#12121A" stroke="#2A2A35" stroke-width="1"/>
-                    <ellipse cx="102" cy="248" rx="10" ry="8" fill="#12121A" stroke="#2A2A35" stroke-width="1"/>
+                    <ellipse cx="63" cy="246" rx="8" ry="7" fill="#12121A" stroke="#2A2A35" stroke-width="1"/>
+                    <ellipse cx="97" cy="246" rx="8" ry="7" fill="#12121A" stroke="#2A2A35" stroke-width="1"/>
 
                     <!-- Panturrilhas -->
-                    <path class="muscle" data-muscle="calves" d="M48 253 L66 253 L64 290 L44 294 Q38 280 48 253Z"/>
-                    <path class="muscle" data-muscle="calves" d="M112 253 L94 253 L96 290 L116 294 Q122 280 112 253Z"/>
+                    <path class="muscle" data-muscle="calves" d="M51 252c6-1 12-1 17 0 1 12-2 28-5 40l-16 3c-4-12-2-31 4-43z"/>
+                    <path class="muscle" data-muscle="calves" d="M109 252c-6-1-12-1-17 0-1 12 2 28 5 40l16 3c4-12 2-31-4-43z"/>
 
                     <!-- Pes -->
-                    <ellipse cx="54" cy="302" rx="12" ry="8" fill="#12121A" stroke="#2A2A35" stroke-width="1"/>
-                    <ellipse cx="106" cy="302" rx="12" ry="8" fill="#12121A" stroke="#2A2A35" stroke-width="1"/>
+                    <path d="M50 294c6-2 12-2 16 0l1 8c-6 3-14 3-20 1l3-9z" fill="#12121A" stroke="#2A2A35" stroke-width="1"/>
+                    <path d="M110 294c-6-2-12-2-16 0l-1 8c6 3 14 3 20 1l-3-9z" fill="#12121A" stroke="#2A2A35" stroke-width="1"/>
 
-                    <text x="80" y="318" class="body-map-label">FRENTE</text>
+                    <text x="80" y="316" class="body-map-label">FRENTE</text>
                 </g>
 
-                <!-- Costas -->
+                <!-- COSTAS -->
                 <g transform="translate(130, 0)">
-                    <!-- Cabeca -->
-                    <ellipse cx="80" cy="22" rx="18" ry="20" fill="#12121A" stroke="#2A2A35" stroke-width="1"/>
-
-                    <!-- Pescoco -->
-                    <rect x="73" y="40" width="14" height="10" rx="4" fill="#12121A" stroke="#2A2A35" stroke-width="1"/>
+                    <ellipse cx="80" cy="24" rx="16" ry="19" fill="#12121A" stroke="#2A2A35" stroke-width="1"/>
+                    <path d="M74 40v9c0 4 3 7 6 7s6-3 6-7v-9" fill="#12121A" stroke="#2A2A35" stroke-width="1"/>
 
                     <!-- Ombros -->
-                    <path class="muscle" data-muscle="shoulders" d="M38 55 Q42 50 55 52 L73 55 L73 72 L48 76 Q35 72 38 55Z"/>
-                    <path class="muscle" data-muscle="shoulders" d="M122 55 Q118 50 105 52 L87 55 L87 72 L112 76 Q125 72 122 55Z"/>
+                    <path class="muscle" data-muscle="shoulders" d="M47 60c3-8 11-13 21-12l6 4v20l-20 4c-9-1-13-8-7-16z"/>
+                    <path class="muscle" data-muscle="shoulders" d="M113 60c-3-8-11-13-21-12l-6 4v20l20 4c9-1 13-8 7-16z"/>
 
                     <!-- Costas -->
-                    <path class="muscle" data-muscle="back" d="M48 76 L73 72 L80 72 L80 155 L48 158 Q40 150 48 76Z"/>
-                    <path class="muscle" data-muscle="back" d="M112 76 L87 72 L80 72 L80 155 L112 158 Q120 150 112 76Z"/>
+                    <path class="muscle" data-muscle="back" d="M53 76c7-4 15-6 21-5v6h6v70c-16 3-32-2-38-12-6-12-3-52 11-59z"/>
+                    <path class="muscle" data-muscle="back" d="M107 76c-7-4-15-6-21-5v6h-6v70c16 3 32-2 38-12 6-12 3-52-11-59z"/>
 
-                    <!-- Bracos -->
-                    <path class="muscle" data-muscle="triceps" d="M48 76 L35 80 L28 115 L32 140 L45 140 L48 112Z"/>
-                    <path class="muscle" data-muscle="triceps" d="M112 76 L125 80 L132 115 L128 140 L115 140 L112 112Z"/>
+                    <!-- Triceps -->
+                    <path class="muscle" data-muscle="triceps" d="M50 76c-8 3-14 12-17 24-2 10-2 22 1 32l14 2 5-28 4-24z"/>
+                    <path class="muscle" data-muscle="triceps" d="M110 76c8 3 14 12 17 24 2 10 2 22-1 32l-14 2-5-28-4-24z"/>
 
-                    <!-- Bracos inferiores -->
-                    <path class="muscle" data-muscle="biceps" d="M32 140 L28 115 L24 145 L26 165 L42 165 L45 140Z"/>
-                    <path class="muscle" data-muscle="biceps" d="M128 140 L132 115 L136 145 L134 165 L118 165 L115 140Z"/>
+                    <!-- Antebraos -->
+                    <path d="M36 132c-3 10-4 22-2 32l2 10 12-2-1-40z" fill="#12121A" stroke="#2A2A35" stroke-width="1"/>
+                    <path d="M124 132c3 10 4 22 2 32l-2 10-12-2 1-40z" fill="#12121A" stroke="#2A2A35" stroke-width="1"/>
+
+                    <!-- Maos -->
+                    <ellipse cx="40" cy="180" rx="7" ry="11" fill="#12121A" stroke="#2A2A35" stroke-width="1"/>
+                    <ellipse cx="120" cy="180" rx="7" ry="11" fill="#12121A" stroke="#2A2A35" stroke-width="1"/>
 
                     <!-- Gluteos -->
-                    <path class="muscle" data-muscle="glutes" d="M48 158 L80 155 L80 190 L48 193 Q40 185 48 158Z"/>
-                    <path class="muscle" data-muscle="glutes" d="M112 158 L80 155 L80 190 L112 193 Q120 185 112 158Z"/>
+                    <path class="muscle" data-muscle="glutes" d="M53 150c8 3 18 5 27 5v4c-1 12-4 24-8 32l-22 3c-6-12-6-33 3-44z"/>
+                    <path class="muscle" data-muscle="glutes" d="M107 150c-8 3-18 5-27 5v4c1 12 4 24 8 32l22 3c6-12 6-33-3-44z"/>
 
                     <!-- Posterior -->
-                    <path class="muscle" data-muscle="hamstrings" d="M48 193 L80 190 L76 235 L48 240 Q40 225 48 193Z"/>
-                    <path class="muscle" data-muscle="hamstrings" d="M112 193 L80 190 L84 235 L112 240 Q120 225 112 193Z"/>
+                    <path class="muscle" data-muscle="hamstrings" d="M53 194c7 2 15 3 22 3l5 1c-1 20-5 44-8 58l-24 4c-6-16-5-46 5-66z"/>
+                    <path class="muscle" data-muscle="hamstrings" d="M107 194c-7 2-15 3-22 3l-5 1c1 20 5 44 8 58l24 4c6-16 5-46-5-66z"/>
+
+                    <!-- Joelhos -->
+                    <ellipse cx="66" cy="264" rx="7" ry="6" fill="#12121A" stroke="#2A2A35" stroke-width="1"/>
+                    <ellipse cx="94" cy="264" rx="7" ry="6" fill="#12121A" stroke="#2A2A35" stroke-width="1"/>
 
                     <!-- Panturrilhas -->
-                    <path class="muscle" data-muscle="calves" d="M48 253 L66 253 L64 290 L44 294 Q38 280 48 253Z"/>
-                    <path class="muscle" data-muscle="calves" d="M112 253 L94 253 L96 290 L116 294 Q122 280 112 253Z"/>
+                    <path class="muscle" data-muscle="calves" d="M52 268c5-1 11-1 15 0 2 10 1 22-2 32l-14 2c-4-10-4-25 1-34z"/>
+                    <path class="muscle" data-muscle="calves" d="M108 268c-5-1-11-1-15 0-2 10-1 22 2 32l14 2c4-10 4-25-1-34z"/>
 
-                    <text x="80" y="318" class="body-map-label">COSTAS</text>
+                    <!-- Pes -->
+                    <path d="M52 300c5-2 11-2 15 0l1 7c-5 3-13 3-18 1l2-8z" fill="#12121A" stroke="#2A2A35" stroke-width="1"/>
+                    <path d="M108 300c-5-2-11-2-15 0l-1 7c5 3 13 3 18 1l-2-8z" fill="#12121A" stroke="#2A2A35" stroke-width="1"/>
+
+                    <text x="80" y="316" class="body-map-label">COSTAS</text>
                 </g>
             </svg>
         `;

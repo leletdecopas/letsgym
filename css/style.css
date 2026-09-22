@@ -315,6 +315,7 @@ body {
     fill: var(--bg-base);
     stroke: var(--border);
     stroke-width: 1;
+    stroke-linejoin: round;
     transition: all 0.3s ease;
     cursor: pointer;
 }
@@ -322,7 +323,7 @@ body {
 .body-map-svg .muscle.active {
     fill: var(--accent);
     stroke: var(--accent);
-    filter: drop-shadow(0 0 8px var(--accent-glow));
+    filter: drop-shadow(0 0 6px var(--accent-glow));
 }
 
 .body-map-svg .muscle:hover {
@@ -943,6 +944,92 @@ body {
     font-weight: 700;
     color: var(--accent);
     font-variant-numeric: tabular-nums;
+}
+
+/* ============================================
+   PR / TROPHY
+   ============================================ */
+.pr-trophy {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    color: #F5C518;
+    flex-shrink: 0;
+}
+
+.pr-trophy svg {
+    width: 16px;
+    height: 16px;
+    filter: drop-shadow(0 0 4px rgba(245, 197, 24, 0.45));
+}
+
+.pr-trophy-sm {
+    width: 16px;
+    height: 16px;
+    margin-right: 0.3rem;
+    vertical-align: -3px;
+}
+
+.pr-trophy-sm svg {
+    width: 14px;
+    height: 14px;
+}
+
+.history-exercise-row.is-pr {
+    border-color: rgba(245, 197, 24, 0.4);
+    background: rgba(245, 197, 24, 0.06);
+}
+
+.complete-prs {
+    position: relative;
+    z-index: 1;
+    margin-bottom: 2rem;
+}
+
+.complete-prs-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.pr-item {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.7rem 0.9rem;
+    background: rgba(245, 197, 24, 0.08);
+    border: 1px solid rgba(245, 197, 24, 0.35);
+    border-radius: var(--radius);
+}
+
+.pr-item-icon {
+    width: 18px;
+    height: 18px;
+    color: #F5C518;
+    flex-shrink: 0;
+}
+
+.pr-item-name {
+    flex: 1;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    text-align: left;
+}
+
+.pr-item-weight {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #F5C518;
+    font-variant-numeric: tabular-nums;
+}
+
+.pr-item-delta {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--success);
 }
 
 .empty-state {

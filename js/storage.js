@@ -270,6 +270,53 @@ const Storage = {
         this.set(this.KEYS.HISTORY, []);
     },
 
+    getExerciseMaxWeight(ex) {
+        if (Array.isArray(ex.sets)) {
+            let max = 0;
+            ex.sets.forEach(s => {
+                if (s.completed && typeof s.weight === 'number' && s.weight > max) {
+                    max = s.weight;
+                }
+            });
+            return max;
+        }
+        if (typeof ex.sets === 'number') {
+            return typeof ex.weight === 'number' ? ex.weight : 0;
+        }
+        return 0;
+    },
+
+    getBestWeight(exerciseName) {
+        const name = String(exerciseName || '').toLowerCase().trim();
+        let best = 0;
+        this.getHistory().forEach(entry => {
+            (entry.exercises || []).forEach(ex => {
+                if (String(ex.name || '').toLowerCase().trim() !== name) return;
+                const max = this.getExerciseMaxWeight(ex);
+                if (max > best) best = max;
+            });
+        });
+        return best;
+    },
+
+    getPRsForSession(exercises) {
+        const prs = [];
+        exercises.forEach(ex => {
+            const current = this.getExerciseMaxWeight(ex);
+            if (current <= 0) return;
+            const previous = this.getBestWeight(ex.name);
+            if (previous > 0 && current > previous) {
+                prs.push({
+                    name: ex.name,
+                    weight: current,
+                    previous,
+                    delta: Math.round((current - previous) * 100) / 100
+                });
+            }
+        });
+        return prs;
+    },
+
     setCurrentWorkout(workoutId) {
         this.set(this.KEYS.CURRENT_WORKOUT, workoutId);
     },

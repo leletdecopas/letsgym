@@ -179,7 +179,7 @@ const App = {
     },
 
     updateBodyMap() {
-        const activeMuscles = Workout.getActiveMusclesForToday();
+        const activeMuscles = Workout.getActiveMusclesForWeek();
         BodyMap.setActive('body-map-container', activeMuscles);
     },
 

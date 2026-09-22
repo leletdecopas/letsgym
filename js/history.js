@@ -44,6 +44,8 @@ const History = {
 
         emptyState.classList.add('hidden');
 
+        const prKeys = this.computePRKeys(history);
+
         const muscleNames = {
             chest: 'Peito',
             back: 'Costas',
@@ -75,8 +77,18 @@ const History = {
                     ` : ''}
                     <div class="history-exercises">
                         ${(entry.exercises || []).map(ex => `
-                            <div class="history-exercise-row">
-                                <span class="history-exercise-name">${ex.name}</span>
+                            <div class="history-exercise-row ${prKeys.has(entry.id + ':' + ex.name) ? 'is-pr' : ''}">
+                                <span class="history-exercise-name">
+                                    ${prKeys.has(entry.id + ':' + ex.name) ? `
+                                        <span class="pr-trophy pr-trophy-sm" title="Recorde pessoal nesta sessao">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0V4z"></path>
+                                                <path d="M17 5h2a2 2 0 0 1 0 4h-2M7 5H5a2 2 0 0 0 0 4h2"></path>
+                                            </svg>
+                                        </span>
+                                    ` : ''}
+                                    ${ex.name}
+                                </span>
                                 <span class="history-exercise-weight">${this.formatSetInfo(ex)}</span>
                             </div>
                         `).join('')}
@@ -84,6 +96,28 @@ const History = {
                 </div>
             `;
         }).join('');
+    },
+
+    computePRKeys(history) {
+        const keys = new Set();
+        const bests = {};
+        const sorted = [...history].sort((a, b) => new Date(a.date) - new Date(b.date));
+
+        sorted.forEach(entry => {
+            (entry.exercises || []).forEach(ex => {
+                const max = Storage.getExerciseMaxWeight(ex);
+                if (max <= 0) return;
+                const prev = bests[ex.name] || 0;
+                if (prev > 0 && max > prev) {
+                    keys.add(entry.id + ':' + ex.name);
+                }
+                if (max > prev) {
+                    bests[ex.name] = max;
+                }
+            });
+        });
+
+        return keys;
     },
 
     formatSetInfo(ex) {

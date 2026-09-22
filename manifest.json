@@ -1,7 +1,7 @@
 {
     "name": "LetsGym - App de Treinos",
     "short_name": "LetsGym",
-    "description": "Registre seus treinos de academia, séries, repetições e progressão de peso",
+    "description": "LetsGym - o seu app favorito de treinos",
     "start_url": "./",
     "display": "standalone",
     "background_color": "#0f0f1a",

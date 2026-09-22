@@ -17,7 +17,7 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <link rel="stylesheet" href="css/style.css?v=2">
+    <link rel="stylesheet" href="css/style.css?v=3">
 </head>
 <body>
     <div id="app">
@@ -30,9 +30,9 @@
                         <path d="M6.5 6.5h11M6.5 17.5h11M4 10v4M20 10v4M6 8v8M18 8v8M2 11v2M22 11v2"/>
                     </svg>
                 </div>
-                <h1 class="welcome-title">Bem-vinda ao <span>LetsGym</span></h1>
+                <h1 class="welcome-title"><span>LetsGym</span></h1>
+                <p class="welcome-slogan">o seu app favorito de treinos</p>
                 <p class="welcome-message">
-                    Ola, seja bem vinda ao seu app preferido de treinos.
                     Para iniciar, basta clicar no botao abaixo.
                     <strong>Bom treino!</strong>
                 </p>
@@ -70,6 +70,13 @@
                 <section class="workouts-section">
                     <div class="section-header">
                         <span class="section-title">Seus Treinos</span>
+                        <button id="btn-add-workout" class="btn-add-workout" title="Novo treino">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="12" y1="5" x2="12" y2="19"></line>
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                            </svg>
+                            Novo
+                        </button>
                     </div>
                     <div id="workouts-list" class="workouts-list"></div>
                 </section>
@@ -327,11 +334,11 @@
             </div>
         </div>
 
-        <!-- MODAL: Editar Treino -->
+        <!-- MODAL: Editar/Novo Treino -->
         <div id="edit-workout-modal" class="modal modal-small">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h3>Editar Treino</h3>
+                    <h3 id="edit-workout-modal-title">Editar Treino</h3>
                     <button id="btn-close-edit-workout" class="btn-close">
                         <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <line x1="18" y1="6" x2="6" y2="18"></line>
@@ -350,6 +357,7 @@
                     </div>
                 </div>
                 <div class="modal-footer">
+                    <button id="btn-delete-workout" class="btn-delete-workout hidden">Excluir</button>
                     <button id="btn-cancel-edit-workout" class="btn-secondary">Cancelar</button>
                     <button id="btn-save-edit-workout" class="btn-primary">Salvar</button>
                 </div>
@@ -357,11 +365,11 @@
         </div>
     </div>
 
-    <script src="js/storage.js?v=2"></script>
-    <script src="js/bodyMap.js?v=2"></script>
-    <script src="js/timer.js?v=2"></script>
-    <script src="js/workout.js?v=2"></script>
-    <script src="js/history.js?v=2"></script>
-    <script src="js/app.js?v=2"></script>
+    <script src="js/storage.js?v=3"></script>
+    <script src="js/bodyMap.js?v=3"></script>
+    <script src="js/timer.js?v=3"></script>
+    <script src="js/workout.js?v=3"></script>
+    <script src="js/history.js?v=3"></script>
+    <script src="js/app.js?v=3"></script>
 </body>
 </html>

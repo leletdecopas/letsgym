@@ -10,11 +10,25 @@ const App = {
         Timer.init();
         Workout.init();
         History.init();
-        BodyMap.init('body-map-container');
+        BodyMap.mount('body-map-container');
+
+        // Unlock audio on first user gesture (mobile requirement)
+        const unlockAudio = () => {
+            AudioAlert.ensure();
+            document.removeEventListener('click', unlockAudio);
+            document.removeEventListener('touchstart', unlockAudio);
+        };
+        document.addEventListener('click', unlockAudio);
+        document.addEventListener('touchstart', unlockAudio);
 
         // Welcome button
         document.getElementById('btn-start').addEventListener('click', () => {
             this.startApp();
+        });
+
+        // Add workout button
+        document.getElementById('btn-add-workout').addEventListener('click', () => {
+            Workout.showCreateWorkoutModal();
         });
 
         // Bottom navigation
@@ -166,7 +180,7 @@ const App = {
 
     updateBodyMap() {
         const activeMuscles = Workout.getActiveMusclesForToday();
-        BodyMap.setActive(activeMuscles);
+        BodyMap.setActive('body-map-container', activeMuscles);
     },
 
     showToast(message) {

@@ -3,9 +3,6 @@
    ============================================ */
 
 const BodyMap = {
-    container: null,
-    activeMuscles: [],
-
     muscleNames: {
         chest: 'Peito',
         back: 'Costas',
@@ -19,22 +16,28 @@ const BodyMap = {
         calves: 'Panturrilha'
     },
 
-    init(containerId) {
-        this.container = document.getElementById(containerId);
-        if (!this.container) return;
-        this.render();
+    mount(containerId, muscles = []) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+        container.innerHTML = this.getSvgMarkup();
+        this.setActive(containerId, muscles);
     },
 
-    setActive(muscles) {
-        this.activeMuscles = muscles || [];
-        this.updateHighlights();
+    setActive(containerId, muscles) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+        const list = muscles || [];
+        container.querySelectorAll('.muscle').forEach(group => {
+            const muscle = group.getAttribute('data-muscle');
+            group.classList.toggle('active', list.includes(muscle));
+        });
     },
 
-    render() {
-        this.container.innerHTML = `
-            <svg class="body-map-svg" viewBox="0 0 180 320" xmlns="http://www.w3.org/2000/svg">
+    getSvgMarkup() {
+        return `
+            <svg class="body-map-svg" viewBox="0 0 270 320" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Mapa muscular">
                 <!-- Frente -->
-                <g transform="translate(10, 0)">
+                <g transform="translate(5, 0)">
                     <!-- Cabeca -->
                     <ellipse cx="80" cy="22" rx="18" ry="20" fill="#12121A" stroke="#2A2A35" stroke-width="1"/>
 
@@ -85,7 +88,7 @@ const BodyMap = {
                 </g>
 
                 <!-- Costas -->
-                <g transform="translate(100, 0)">
+                <g transform="translate(130, 0)">
                     <!-- Cabeca -->
                     <ellipse cx="80" cy="22" rx="18" ry="20" fill="#12121A" stroke="#2A2A35" stroke-width="1"/>
 
@@ -124,21 +127,6 @@ const BodyMap = {
                 </g>
             </svg>
         `;
-
-        this.updateHighlights();
-    },
-
-    updateHighlights() {
-        if (!this.container) return;
-        const muscleGroups = this.container.querySelectorAll('.muscle');
-        muscleGroups.forEach(group => {
-            const muscle = group.getAttribute('data-muscle');
-            if (this.activeMuscles.includes(muscle)) {
-                group.classList.add('active');
-            } else {
-                group.classList.remove('active');
-            }
-        });
     },
 
     getMuscleName(muscleId) {

@@ -71,6 +71,9 @@ const Workout = {
         document.getElementById('btn-save-edit-workout').addEventListener('click', () => {
             this.saveWorkoutEdit();
         });
+        document.getElementById('btn-delete-workout').addEventListener('click', () => {
+            this.deleteWorkout();
+        });
 
         document.getElementById('exercise-modal').addEventListener('click', (e) => {
             if (e.target.id === 'exercise-modal') this.hideExerciseModal();
@@ -92,7 +95,7 @@ const Workout = {
         if (!workout) return;
 
         document.getElementById('workout-title').textContent = workout.name;
-        BodyMap.setActive(this.getWorkoutMuscles(workoutId));
+        BodyMap.setActive('body-map-container', this.getWorkoutMuscles(workoutId));
         this.renderExercises();
         App.showScreen('workout');
     },
@@ -229,7 +232,7 @@ const Workout = {
 
         // Update UI
         this.renderExercises();
-        BodyMap.setActive(this.getWorkoutMuscles(this.currentWorkoutId));
+        BodyMap.setActive('body-map-container', this.getWorkoutMuscles(this.currentWorkoutId));
 
         // Start timer if set was completed
         if (set.completed) {
@@ -346,25 +349,7 @@ const Workout = {
     },
 
     playAlert() {
-        try {
-            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-            const playBeep = (time, freq, duration) => {
-                const oscillator = audioContext.createOscillator();
-                const gainNode = audioContext.createGain();
-                oscillator.connect(gainNode);
-                gainNode.connect(audioContext.destination);
-                oscillator.frequency.value = freq;
-                oscillator.type = 'sine';
-                gainNode.gain.setValueAtTime(0.3, time);
-                gainNode.gain.exponentialRampToValueAtTime(0.01, time + duration);
-                oscillator.start(time);
-                oscillator.stop(time + duration);
-            };
-            const now = audioContext.currentTime;
-            playBeep(now, 880, 0.2);
-            playBeep(now + 0.3, 880, 0.2);
-            playBeep(now + 0.6, 1100, 0.4);
-        } catch (e) {}
+        AudioAlert.play();
     },
 
     addSet(exerciseId) {
@@ -501,7 +486,7 @@ const Workout = {
 
         this.hideExerciseModal();
         this.renderExercises();
-        BodyMap.setActive(this.getWorkoutMuscles(this.currentWorkoutId));
+        BodyMap.setActive('body-map-container', this.getWorkoutMuscles(this.currentWorkoutId));
     },
 
     editExercise(exerciseId) {
@@ -512,7 +497,7 @@ const Workout = {
         if (confirm('Tem certeza que deseja excluir este exercicio?')) {
             Storage.deleteExercise(this.currentWorkoutId, exerciseId);
             this.renderExercises();
-            BodyMap.setActive(this.getWorkoutMuscles(this.currentWorkoutId));
+            BodyMap.setActive('body-map-container', this.getWorkoutMuscles(this.currentWorkoutId));
             App.showToast('Exercicio removido');
         }
     },
@@ -553,6 +538,9 @@ const Workout = {
             exercises: historyExercises
         });
 
+        // Reset all sets so the workout is fresh next time
+        Storage.resetWorkoutSets(this.currentWorkoutId);
+
         this.hideFinishModal();
         this.showCompleteScreen(workout.name, muscles);
     },
@@ -565,21 +553,31 @@ const Workout = {
             `<span class="muscle-tag">${this.muscleNames[m] || m}</span>`
         ).join('');
 
-        BodyMap.init('complete-body-map-container');
-        BodyMap.setActive(muscles);
+        BodyMap.mount('complete-body-map-container', muscles);
 
         App.showScreen('workout-complete');
     },
 
-    // Edit Workout Modal
+    // Create / Edit Workout Modal
+    showCreateWorkoutModal() {
+        this.editingWorkoutId = null;
+        document.getElementById('edit-workout-modal-title').textContent = 'Novo Treino';
+        document.getElementById('edit-workout-name').value = '';
+        document.getElementById('edit-workout-subtitle').value = '';
+        document.getElementById('btn-delete-workout').classList.add('hidden');
+        document.getElementById('edit-workout-modal').classList.add('active');
+    },
+
     showEditWorkoutModal(workoutId) {
         this.editingWorkoutId = workoutId;
         const workouts = Storage.getWorkouts();
         const workout = workouts.find(w => w.id === workoutId);
         if (!workout) return;
 
+        document.getElementById('edit-workout-modal-title').textContent = 'Editar Treino';
         document.getElementById('edit-workout-name').value = workout.name;
         document.getElementById('edit-workout-subtitle').value = workout.subtitle || '';
+        document.getElementById('btn-delete-workout').classList.remove('hidden');
         document.getElementById('edit-workout-modal').classList.add('active');
     },
 
@@ -597,18 +595,37 @@ const Workout = {
             return;
         }
 
-        const workouts = Storage.getWorkouts();
-        const workoutIndex = workouts.findIndex(w => w.id === this.editingWorkoutId);
+        if (!this.editingWorkoutId) {
+            Storage.addWorkout(name, subtitle);
+            App.showToast('Treino criado');
+        } else {
+            const workouts = Storage.getWorkouts();
+            const workoutIndex = workouts.findIndex(w => w.id === this.editingWorkoutId);
 
-        if (workoutIndex !== -1) {
-            workouts[workoutIndex].name = name;
-            workouts[workoutIndex].subtitle = subtitle;
-            Storage.saveWorkouts(workouts);
-            App.showToast('Treino atualizado');
+            if (workoutIndex !== -1) {
+                workouts[workoutIndex].name = name;
+                workouts[workoutIndex].subtitle = subtitle;
+                Storage.saveWorkouts(workouts);
+                App.showToast('Treino atualizado');
+            }
         }
 
         this.hideEditWorkoutModal();
         App.renderWorkouts();
+    },
+
+    deleteWorkout() {
+        if (!this.editingWorkoutId) return;
+        const workouts = Storage.getWorkouts();
+        const workout = workouts.find(w => w.id === this.editingWorkoutId);
+        if (!workout) return;
+
+        if (!confirm(`Excluir "${workout.name}"? O historico sera mantido.`)) return;
+
+        Storage.deleteWorkout(this.editingWorkoutId);
+        this.hideEditWorkoutModal();
+        App.renderWorkouts();
+        App.showToast('Treino excluido');
     },
 
     getActiveMusclesForToday() {

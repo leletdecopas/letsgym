@@ -77,13 +77,33 @@ const History = {
                         ${(entry.exercises || []).map(ex => `
                             <div class="history-exercise-row">
                                 <span class="history-exercise-name">${ex.name}</span>
-                                <span class="history-exercise-weight">${ex.sets}x${ex.reps} - ${ex.weight}kg</span>
+                                <span class="history-exercise-weight">${this.formatSetInfo(ex)}</span>
                             </div>
                         `).join('')}
                     </div>
                 </div>
             `;
         }).join('');
+    },
+
+    formatSetInfo(ex) {
+        if (Array.isArray(ex.sets)) {
+            const total = ex.sets.length;
+            const reps = ex.sets[0] && ex.sets[0].targetReps != null ? ex.sets[0].targetReps : '-';
+            const weights = ex.sets.map(s => s.weight).filter(w => w != null);
+            if (weights.length === 0) return `${total}x${reps}`;
+            const minW = Math.min(...weights);
+            const maxW = Math.max(...weights);
+            const weightStr = minW === maxW ? minW : `${minW}-${maxW}`;
+            return `${total}x${reps} - ${weightStr}kg`;
+        }
+        // Legacy format
+        if (typeof ex.sets === 'number') {
+            const reps = ex.reps != null ? ex.reps : 12;
+            const weight = ex.weight != null ? ex.weight : 0;
+            return `${ex.sets}x${reps} - ${weight}kg`;
+        }
+        return '';
     },
 
     formatDate(date) {

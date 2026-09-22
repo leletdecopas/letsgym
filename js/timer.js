@@ -2,12 +2,78 @@
    TIMER - Contagem de descanso
    ============================================ */
 
+const AudioAlert = {
+    ctx: null,
+
+    ensure() {
+        if (!this.ctx) {
+            try {
+                this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+            } catch (e) {
+                return null;
+            }
+        }
+        if (this.ctx.state === 'suspended') {
+            this.ctx.resume().catch(() => {});
+        }
+        return this.ctx;
+    },
+
+    vibrate() {
+        try {
+            if (navigator.vibrate) navigator.vibrate([200, 100, 200, 100, 300]);
+        } catch (e) {}
+    },
+
+    play() {
+        this.vibrate();
+        const ctx = this.ensure();
+        if (!ctx) return;
+
+        const playWhenReady = () => {
+            if (ctx.state !== 'running') {
+                ctx.resume().then(() => this.beeps(ctx)).catch(() => {});
+                return;
+            }
+            this.beeps(ctx);
+        };
+
+        if (ctx.state === 'suspended') {
+            ctx.resume().then(playWhenReady).catch(() => {});
+        } else {
+            playWhenReady();
+        }
+    },
+
+    beeps(ctx) {
+        try {
+            const playBeep = (time, freq, duration) => {
+                const oscillator = ctx.createOscillator();
+                const gainNode = ctx.createGain();
+                oscillator.connect(gainNode);
+                gainNode.connect(ctx.destination);
+                oscillator.frequency.value = freq;
+                oscillator.type = 'sine';
+                gainNode.gain.setValueAtTime(0.3, time);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, time + duration);
+                oscillator.start(time);
+                oscillator.stop(time + duration);
+            };
+            const now = ctx.currentTime;
+            playBeep(now, 880, 0.2);
+            playBeep(now + 0.3, 880, 0.2);
+            playBeep(now + 0.6, 1100, 0.4);
+        } catch (e) {
+            this.vibrate();
+        }
+    }
+};
+
 const Timer = {
     interval: null,
     timeRemaining: 0,
     totalTime: 0,
     isRunning: false,
-    audioContext: null,
     currentExerciseId: null,
 
     elements: {
@@ -58,6 +124,8 @@ const Timer = {
     },
 
     start(seconds, exerciseName = '', setInfo = '', exerciseId = null) {
+        AudioAlert.ensure();
+
         if (this.isRunning) {
             this.stop();
         }
@@ -124,35 +192,7 @@ const Timer = {
     },
 
     playAlert() {
-        try {
-            if (!this.audioContext) {
-                this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
-            }
-
-            const playBeep = (time, freq, duration) => {
-                const oscillator = this.audioContext.createOscillator();
-                const gainNode = this.audioContext.createGain();
-
-                oscillator.connect(gainNode);
-                gainNode.connect(this.audioContext.destination);
-
-                oscillator.frequency.value = freq;
-                oscillator.type = 'sine';
-
-                gainNode.gain.setValueAtTime(0.3, time);
-                gainNode.gain.exponentialRampToValueAtTime(0.01, time + duration);
-
-                oscillator.start(time);
-                oscillator.stop(time + duration);
-            };
-
-            const now = this.audioContext.currentTime;
-            playBeep(now, 880, 0.2);
-            playBeep(now + 0.3, 880, 0.2);
-            playBeep(now + 0.6, 1100, 0.4);
-        } catch (e) {
-            // Audio not supported
-        }
+        AudioAlert.play();
     },
 
     onFinish(callback) {

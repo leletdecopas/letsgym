@@ -298,9 +298,17 @@ body {
     background: linear-gradient(90deg, transparent, var(--accent-soft), transparent);
 }
 
+#body-map-container,
+#complete-body-map-container {
+    width: 100%;
+}
+
 .body-map-svg {
-    max-height: 260px;
-    width: auto;
+    display: block;
+    width: 100%;
+    max-width: 260px;
+    height: auto;
+    margin: 0 auto;
 }
 
 .body-map-svg .muscle {
@@ -1039,6 +1047,17 @@ body {
 
 .welcome-title span {
     color: var(--accent);
+}
+
+.welcome-slogan {
+    position: relative;
+    z-index: 1;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    letter-spacing: 0.06em;
+    margin-top: -0.35rem;
+    margin-bottom: 1.75rem;
 }
 
 .welcome-message {
@@ -2027,4 +2046,51 @@ body {
 
 .timer-inline-minimize:hover svg {
     color: var(--text-primary);
+}
+
+/* ============================================
+   ADD / DELETE WORKOUT
+   ============================================ */
+.btn-add-workout {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.4rem 0.75rem;
+    background: var(--accent-soft);
+    border: 1px solid rgba(255, 107, 53, 0.3);
+    border-radius: var(--radius-sm);
+    color: var(--accent);
+    font-size: 0.75rem;
+    font-weight: 700;
+    font-family: var(--font);
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.btn-add-workout svg {
+    width: 14px;
+    height: 14px;
+}
+
+.btn-add-workout:hover {
+    background: rgba(255, 107, 53, 0.2);
+    transform: scale(1.03);
+}
+
+.btn-delete-workout {
+    flex: 0 !important;
+    padding: 0.9rem 1rem;
+    background: var(--danger-soft);
+    border: 1px solid rgba(239, 68, 68, 0.35);
+    color: var(--danger);
+    border-radius: var(--radius);
+    font-size: 0.95rem;
+    font-weight: 700;
+    font-family: var(--font);
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.btn-delete-workout:hover {
+    background: rgba(239, 68, 68, 0.2);
 }

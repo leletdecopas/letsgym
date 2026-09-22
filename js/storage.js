@@ -65,6 +65,31 @@ const Storage = {
         this.set(this.KEYS.WORKOUTS, workouts);
     },
 
+    addWorkout(name, subtitle = '') {
+        const workouts = this.getWorkouts();
+        const workout = {
+            id: 'workout_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
+            name,
+            subtitle
+        };
+        workouts.push(workout);
+        this.saveWorkouts(workouts);
+        return workout;
+    },
+
+    deleteWorkout(workoutId) {
+        const workouts = this.getWorkouts().filter(w => w.id !== workoutId);
+        this.saveWorkouts(workouts);
+
+        const allExercises = this.get(this.KEYS.EXERCISES) || {};
+        delete allExercises[workoutId];
+        this.set(this.KEYS.EXERCISES, allExercises);
+
+        if (this.getCurrentWorkout() === workoutId) {
+            this.clearCurrentWorkout();
+        }
+    },
+
     getExercises(workoutId) {
         const allExercises = this.get(this.KEYS.EXERCISES) || {};
         const exercises = allExercises[workoutId] || [];
@@ -171,6 +196,17 @@ const Storage = {
 
         this.saveExercises(workoutId, exercises);
         return { exercise, set };
+    },
+
+    resetWorkoutSets(workoutId) {
+        const exercises = this.getExercises(workoutId);
+        exercises.forEach(ex => {
+            (ex.sets || []).forEach(s => {
+                s.completed = false;
+                s.completedAt = null;
+            });
+        });
+        this.saveExercises(workoutId, exercises);
     },
 
     addSet(workoutId, exerciseId) {

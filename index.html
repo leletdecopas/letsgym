@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#0A0A0F">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="description" content="LetsGym - Registre seus treinos de academia">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/svg+xml" href="icons/icon-192.svg">
+    <link rel="apple-touch-icon" href="icons/icon-192.svg">
+    <title>LetsGym</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <link rel="stylesheet" href="css/style.css?v=2">
+</head>
+<body>
+    <div id="app">
+
+        <!-- TELA DE BOAS-VINDAS -->
+        <div id="welcome-screen" class="screen no-tab-bar active">
+            <div class="welcome-content">
+                <div class="welcome-logo">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M6.5 6.5h11M6.5 17.5h11M4 10v4M20 10v4M6 8v8M18 8v8M2 11v2M22 11v2"/>
+                    </svg>
+                </div>
+                <h1 class="welcome-title">Bem-vinda ao <span>LetsGym</span></h1>
+                <p class="welcome-message">
+                    Ola, seja bem vinda ao seu app preferido de treinos.
+                    Para iniciar, basta clicar no botao abaixo.
+                    <strong>Bom treino!</strong>
+                </p>
+                <button id="btn-start" class="btn-welcome">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M6.5 6.5h11M6.5 17.5h11M4 10v4M20 10v4M6 8v8M18 8v8M2 11v2M22 11v2"/>
+                    </svg>
+                    Comecar Treino
+                </button>
+                <p class="welcome-credits">Desenvolvido Por: Letícia Silva</p>
+            </div>
+        </div>
+
+        <!-- TELA PRINCIPAL -->
+        <div id="main-screen" class="screen">
+            <header class="app-header">
+                <div class="app-logo">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M6.5 6.5h11M6.5 17.5h11M4 10v4M20 10v4M6 8v8M18 8v8M2 11v2M22 11v2"/>
+                    </svg>
+                    <span class="app-logo-text">LetsGym</span>
+                </div>
+            </header>
+
+            <div class="main-content">
+                <section class="body-map-section">
+                    <div class="section-header">
+                        <span class="section-title">Musculos Treinados Hoje</span>
+                    </div>
+                    <div class="body-map-card">
+                        <div id="body-map-container"></div>
+                    </div>
+                </section>
+
+                <section class="workouts-section">
+                    <div class="section-header">
+                        <span class="section-title">Seus Treinos</span>
+                    </div>
+                    <div id="workouts-list" class="workouts-list"></div>
+                </section>
+            </div>
+
+            <footer class="app-footer">
+                Desenvolvido Por: Letícia Silva
+            </footer>
+        </div>
+
+        <!-- TELA DO TREINO -->
+        <div id="workout-screen" class="screen no-tab-bar">
+            <header class="app-header">
+                <button id="btn-back-main" class="btn-back">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="15 18 9 12 15 6"></polyline>
+                    </svg>
+                    Voltar
+                </button>
+                <h1 id="workout-title" class="app-logo-text"></h1>
+                <button id="btn-finish-workout" class="btn-finish">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                    Finalizar
+                </button>
+            </header>
+
+            <div class="main-content">
+                <div id="exercises-list" class="exercises-list"></div>
+                <button id="btn-add-exercise" class="btn-add-exercise">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                    Adicionar Exercicio
+                </button>
+            </div>
+        </div>
+
+        <!-- TELA DO TIMER -->
+        <div id="timer-screen" class="screen no-tab-bar">
+            <header class="app-header">
+                <button id="btn-back-timer" class="btn-back">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="15 18 9 12 15 6"></polyline>
+                    </svg>
+                    Voltar ao Treino
+                </button>
+            </header>
+
+            <div class="timer-content">
+                <div class="timer-display">
+                    <div id="timer-circle" class="timer-circle">
+                        <span id="timer-value">00:00</span>
+                    </div>
+                </div>
+
+                <div class="timer-exercise-info">
+                    <p id="timer-exercise-name">Descanso</p>
+                    <p id="timer-set-info"></p>
+                </div>
+
+                <div class="timer-presets">
+                    <button class="btn-preset" data-time="30">30s</button>
+                    <button class="btn-preset" data-time="60">60s</button>
+                    <button class="btn-preset" data-time="90">90s</button>
+                    <button class="btn-preset" data-time="120">2min</button>
+                </div>
+
+                <div class="timer-custom">
+                    <label for="timer-custom-input">Ou digite o tempo</label>
+                    <div class="timer-custom-input-group">
+                        <input type="number" id="timer-custom-input" min="5" max="600" value="90" placeholder="Segundos">
+                        <span class="input-suffix">seg</span>
+                        <button id="btn-custom-timer" class="btn-primary">Iniciar</button>
+                    </div>
+                </div>
+
+                <div class="timer-actions">
+                    <button id="btn-stop-timer" class="btn-stop">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="6" y="6" width="12" height="12" rx="2"></rect>
+                        </svg>
+                        Parar
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- TELA DO HISTORICO -->
+        <div id="history-screen" class="screen">
+            <header class="app-header">
+                <div class="app-logo">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 3v18h18"></path>
+                        <path d="M18 17V9"></path>
+                        <path d="M13 17V5"></path>
+                        <path d="M8 17v-3"></path>
+                    </svg>
+                    <span class="app-logo-text">Historico</span>
+                </div>
+            </header>
+
+            <div class="main-content">
+                <div class="history-filters">
+                    <select id="history-filter-workout">
+                        <option value="all">Todos os treinos</option>
+                    </select>
+                </div>
+                <div id="history-list" class="history-list"></div>
+                <div id="history-empty" class="empty-state hidden">
+                    <div class="empty-state-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M3 3v18h18"></path>
+                            <path d="M18 17V9"></path>
+                            <path d="M13 17V5"></path>
+                            <path d="M8 17v-3"></path>
+                        </svg>
+                    </div>
+                    <h3 class="empty-state-title">Nenhum treino registrado</h3>
+                    <p class="empty-state-text">Complete um treino para ve-lo aqui!</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- BOTTOM NAVIGATION -->
+        <nav class="bottom-nav" id="bottom-nav">
+            <button class="nav-item active" data-tab="main">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                    <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                </svg>
+                <span>Treinos</span>
+            </button>
+            <button class="nav-item" data-tab="timer">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <polyline points="12 6 12 12 16 14"></polyline>
+                </svg>
+                <span>Timer</span>
+            </button>
+            <button class="nav-item" data-tab="history">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 3v18h18"></path>
+                    <path d="M18 17V9"></path>
+                    <path d="M13 17V5"></path>
+                    <path d="M8 17v-3"></path>
+                </svg>
+                <span>Historico</span>
+            </button>
+        </nav>
+
+        <!-- MODAL: Adicionar/Editar Exercicio -->
+        <div id="exercise-modal" class="modal modal-small">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 id="modal-title">Adicionar Exercicio</h3>
+                    <button id="btn-close-modal" class="btn-close">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="exercise-name">Nome do Exercicio</label>
+                        <input type="text" id="exercise-name" placeholder="Ex: Supino Reto">
+                    </div>
+                    <div class="form-group">
+                        <label for="exercise-muscle">Grupo Muscular</label>
+                        <select id="exercise-muscle">
+                            <option value="chest">Peito</option>
+                            <option value="back">Costas</option>
+                            <option value="shoulders">Ombros</option>
+                            <option value="biceps">Biceps</option>
+                            <option value="triceps">Triceps</option>
+                            <option value="quadriceps">Quadriceps</option>
+                            <option value="hamstrings">Posterior</option>
+                            <option value="glutes">Gluteos</option>
+                            <option value="abs">Abdomen</option>
+                            <option value="calves">Panturrilha</option>
+                        </select>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="exercise-sets">Series</label>
+                            <input type="number" id="exercise-sets" min="1" max="20" value="3">
+                        </div>
+                        <div class="form-group">
+                            <label for="exercise-reps">Repeticoes</label>
+                            <input type="number" id="exercise-reps" min="1" max="100" value="12">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="exercise-weight">Ultimo Peso (kg)</label>
+                        <input type="number" id="exercise-weight" min="0" step="0.5" value="0" placeholder="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="exercise-rest">Tempo de Descanso (seg)</label>
+                        <input type="number" id="exercise-rest" min="10" max="600" value="90">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button id="btn-cancel-exercise" class="btn-secondary">Cancelar</button>
+                    <button id="btn-save-exercise" class="btn-primary">Salvar</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODAL: Finalizar Treino -->
+        <div id="finish-modal" class="modal modal-small">
+            <div class="modal-content" style="text-align: center;">
+                <div class="modal-header" style="justify-content: center;">
+                    <h3>Finalizar Treino?</h3>
+                </div>
+                <div class="modal-body">
+                    <p style="color: var(--text-secondary);">Os dados serao salvos no historico.</p>
+                </div>
+                <div class="modal-footer">
+                    <button id="btn-cancel-finish" class="btn-secondary">Cancelar</button>
+                    <button id="btn-confirm-finish" class="btn-primary">Finalizar</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- TELA: Treino Finalizado -->
+        <div id="workout-complete-screen" class="screen no-tab-bar">
+            <div class="complete-content">
+                <div class="complete-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                        <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                    </svg>
+                </div>
+                <h1 class="complete-title">Treino Finalizado!</h1>
+                <p class="complete-subtitle" id="complete-workout-name"></p>
+
+                <div class="complete-body-map">
+                    <div id="complete-body-map-container"></div>
+                </div>
+
+                <div class="complete-muscles">
+                    <span class="complete-muscles-label">Musculos trabalhados:</span>
+                    <div id="complete-muscles-list" class="complete-muscles-tags"></div>
+                </div>
+
+                <button id="btn-back-complete" class="btn-back-complete">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="15 18 9 12 15 6"></polyline>
+                    </svg>
+                    Voltar
+                </button>
+            </div>
+        </div>
+
+        <!-- MODAL: Editar Treino -->
+        <div id="edit-workout-modal" class="modal modal-small">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Editar Treino</h3>
+                    <button id="btn-close-edit-workout" class="btn-close">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="edit-workout-name">Nome do Treino</label>
+                        <input type="text" id="edit-workout-name" placeholder="Ex: Treino A">
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-workout-subtitle">Subtitulo (opcional)</label>
+                        <input type="text" id="edit-workout-subtitle" placeholder="Ex: Peito e Triceps">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button id="btn-cancel-edit-workout" class="btn-secondary">Cancelar</button>
+                    <button id="btn-save-edit-workout" class="btn-primary">Salvar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/storage.js?v=2"></script>
+    <script src="js/bodyMap.js?v=2"></script>
+    <script src="js/timer.js?v=2"></script>
+    <script src="js/workout.js?v=2"></script>
+    <script src="js/history.js?v=2"></script>
+    <script src="js/app.js?v=2"></script>
+</body>
+</html>

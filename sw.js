@@ -1,4 +1,4 @@
-const CACHE_NAME = 'letsgym-v5';
+const CACHE_NAME = 'letsgym-v6';
 const urlsToCache = [
     './',
     './index.html',
@@ -9,7 +9,11 @@ const urlsToCache = [
     './js/workout.js',
     './js/history.js',
     './js/app.js',
-    './manifest.json'
+    './manifest.json',
+    './icons/apple-touch-icon.png',
+    './icons/icon-192.png',
+    './icons/icon-512.png',
+    './icons/favicon-32.png'
 ];
 
 self.addEventListener('install', event => {

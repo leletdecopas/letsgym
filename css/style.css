@@ -25,6 +25,20 @@
     --success-soft: rgba(74, 222, 128, 0.12);
     --danger: #EF4444;
     --danger-soft: rgba(239, 68, 68, 0.12);
+    --header-bg: rgba(10, 10, 15, 0.85);
+    --nav-bg: rgba(18, 18, 26, 0.92);
+    --overlay: rgba(0, 0, 0, 0.75);
+    --trophy: #F5C518;
+    --trophy-soft: rgba(245, 197, 24, 0.08);
+    --trophy-border: rgba(245, 197, 24, 0.35);
+    --trophy-glow: rgba(245, 197, 24, 0.45);
+    --map-highlight: #1177DE;
+    --map-glow: rgba(17, 119, 222, 0.45);
+    --map-accent-soft: rgba(17, 119, 222, 0.35);
+    --bm-base: #12121A;
+    --bm-muscle: #16161F;
+    --bm-stroke: #2A2A35;
+    --bm-line: #55556A;
     --radius-sm: 8px;
     --radius: 12px;
     --radius-lg: 16px;
@@ -33,6 +47,35 @@
     --shadow-lg: 0 8px 32px rgba(0,0,0,0.5);
     --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     --transition: 0.2s ease;
+}
+
+html[data-theme="light"] {
+    --bg-base: #F4F5F7;
+    --bg-surface: #FFFFFF;
+    --bg-elevated: #FFFFFF;
+    --bg-card: #FFFFFF;
+    --border: #E2E4E9;
+    --border-light: #D0D3DB;
+    --text-primary: #14161C;
+    --text-secondary: #4A4F63;
+    --text-muted: #8A90A6;
+    --success: #16A34A;
+    --success-soft: rgba(22, 163, 74, 0.12);
+    --danger: #DC2626;
+    --danger-soft: rgba(220, 38, 38, 0.12);
+    --header-bg: rgba(244, 245, 247, 0.88);
+    --nav-bg: rgba(255, 255, 255, 0.94);
+    --overlay: rgba(15, 18, 30, 0.45);
+    --trophy: #B45309;
+    --trophy-soft: rgba(180, 83, 9, 0.08);
+    --trophy-border: rgba(180, 83, 9, 0.35);
+    --trophy-glow: rgba(180, 83, 9, 0.3);
+    --bm-base: #E9ECF2;
+    --bm-muscle: #FFFFFF;
+    --bm-stroke: #C9CEDA;
+    --bm-line: #AEB3C4;
+    --shadow: 0 2px 12px rgba(20, 25, 40, 0.08);
+    --shadow-lg: 0 8px 32px rgba(20, 25, 40, 0.12);
 }
 
 html {
@@ -79,7 +122,7 @@ body {
     align-items: center;
     justify-content: space-between;
     padding: calc(1rem + env(safe-area-inset-top, 0px)) 1.25rem 1rem;
-    background: rgba(10, 10, 15, 0.85);
+    background: var(--header-bg);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     border-bottom: 1px solid var(--border);
@@ -233,7 +276,7 @@ body {
     align-items: center;
     justify-content: space-around;
     height: 72px;
-    background: rgba(18, 18, 26, 0.92);
+    background: var(--nav-bg);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     border-top: 1px solid var(--border);
@@ -333,7 +376,7 @@ body {
     left: 0;
     right: 0;
     height: 1px;
-    background: linear-gradient(90deg, transparent, var(--accent-soft), transparent);
+    background: linear-gradient(90deg, transparent, var(--map-accent-soft), transparent);
 }
 
 #body-map-container,
@@ -349,23 +392,44 @@ body {
     margin: 0 auto;
 }
 
-.body-map-svg .muscle {
-    fill: var(--bg-base);
-    stroke: var(--border);
+.body-map-svg .bm-base {
+    fill: var(--bm-base);
+    stroke: var(--bm-stroke);
     stroke-width: 1;
     stroke-linejoin: round;
-    transition: all 0.3s ease;
+}
+
+.body-map-svg .muscle {
+    fill: var(--bm-muscle);
+    stroke: var(--bm-stroke);
+    stroke-width: 1;
+    stroke-linejoin: round;
+    transition: fill 0.3s ease, stroke 0.3s ease;
     cursor: pointer;
 }
 
+.body-map-svg .muscle-detail {
+    fill: none;
+    stroke: var(--bm-line);
+    stroke-width: 0.9;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    pointer-events: none;
+    transition: stroke 0.3s ease;
+}
+
 .body-map-svg .muscle.active {
-    fill: var(--accent);
-    stroke: var(--accent);
-    filter: drop-shadow(0 0 6px var(--accent-glow));
+    fill: var(--map-highlight);
+    stroke: var(--map-highlight);
+    filter: drop-shadow(0 0 6px var(--map-glow));
+}
+
+.body-map-svg .muscle.active .muscle-detail {
+    stroke: rgba(0, 0, 0, 0.4);
 }
 
 .body-map-svg .muscle:hover {
-    stroke: var(--accent);
+    stroke: var(--map-highlight);
     stroke-width: 1.5;
 }
 
@@ -1005,14 +1069,14 @@ body {
     justify-content: center;
     width: 20px;
     height: 20px;
-    color: #F5C518;
+    color: var(--trophy);
     flex-shrink: 0;
 }
 
 .pr-trophy svg {
     width: 16px;
     height: 16px;
-    filter: drop-shadow(0 0 4px rgba(245, 197, 24, 0.45));
+    filter: drop-shadow(0 0 4px var(--trophy-glow));
 }
 
 .pr-trophy-sm {
@@ -1028,8 +1092,8 @@ body {
 }
 
 .history-exercise-row.is-pr {
-    border-color: rgba(245, 197, 24, 0.4);
-    background: rgba(245, 197, 24, 0.06);
+    border-color: var(--trophy-border);
+    background: var(--trophy-soft);
 }
 
 .complete-prs {
@@ -1049,15 +1113,15 @@ body {
     align-items: center;
     gap: 0.6rem;
     padding: 0.7rem 0.9rem;
-    background: rgba(245, 197, 24, 0.08);
-    border: 1px solid rgba(245, 197, 24, 0.35);
+    background: var(--trophy-soft);
+    border: 1px solid var(--trophy-border);
     border-radius: var(--radius);
 }
 
 .pr-item-icon {
     width: 18px;
     height: 18px;
-    color: #F5C518;
+    color: var(--trophy);
     flex-shrink: 0;
 }
 
@@ -1072,7 +1136,7 @@ body {
 .pr-item-weight {
     font-size: 0.9rem;
     font-weight: 700;
-    color: #F5C518;
+    color: var(--trophy);
     font-variant-numeric: tabular-nums;
 }
 
@@ -1263,7 +1327,7 @@ body {
     display: none;
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.75);
+    background: var(--overlay);
     z-index: 1000;
     align-items: flex-end;
     justify-content: center;
@@ -2230,4 +2294,228 @@ body {
 
 .btn-delete-workout:hover {
     background: rgba(239, 68, 68, 0.2);
+}
+
+/* ============================================
+   HEADER ACTIONS / THEME TOGGLE
+   ============================================ */
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.theme-icon {
+    display: none;
+    width: 16px;
+    height: 16px;
+}
+
+html[data-theme="light"] .theme-icon-sun {
+    display: block;
+}
+
+html:not([data-theme="light"]) .theme-icon-moon {
+    display: block;
+}
+
+/* ============================================
+   ACTIVE WORKOUT BANNER
+   ============================================ */
+.active-workout-banner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.9rem 1rem;
+    margin-bottom: 1.5rem;
+    background: linear-gradient(135deg, var(--accent-soft), rgba(255, 107, 53, 0.04));
+    border: 1px solid rgba(255, 107, 53, 0.35);
+    border-radius: var(--radius-lg);
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.active-workout-banner:hover {
+    border-color: var(--accent);
+    transform: translateY(-1px);
+}
+
+.active-workout-banner:active {
+    transform: scale(0.99);
+}
+
+.banner-info {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    min-width: 0;
+}
+
+.banner-info svg {
+    width: 22px;
+    height: 22px;
+    color: var(--accent);
+    flex-shrink: 0;
+}
+
+.banner-texts {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+    min-width: 0;
+}
+
+.banner-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--accent);
+}
+
+.banner-name {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.banner-cta {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--accent);
+    flex-shrink: 0;
+}
+
+.banner-cta svg {
+    width: 16px;
+    height: 16px;
+}
+
+/* ============================================
+   SECTION ACTIONS (Compartilhar / Novo)
+   ============================================ */
+.section-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+/* ============================================
+   WORKOUT GLOBAL PROGRESS
+   ============================================ */
+.workout-progress {
+    padding-top: 1rem;
+    margin-bottom: 0.75rem;
+}
+
+.workout-progress-info {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.45rem;
+}
+
+.workout-progress-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+}
+
+.workout-progress-text {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    font-variant-numeric: tabular-nums;
+}
+
+.workout-progress .workout-progress-bar {
+    width: 100%;
+    height: 8px;
+    border-radius: 4px;
+    background: var(--bg-elevated);
+}
+
+.workout-progress .progress-fill {
+    border-radius: 4px;
+    background: var(--accent);
+}
+
+/* ============================================
+   INTERACTIVE AFFORDANCE
+   ============================================ */
+button {
+    cursor: pointer;
+}
+
+button:focus-visible,
+[role="button"]:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+}
+
+.btn-primary:active,
+.btn-secondary:active,
+.btn-welcome:active,
+.btn-finish:active,
+.btn-home:active,
+.btn-add-workout:active,
+.btn-add-exercise:active,
+.btn-add-set:active,
+.btn-preset:active,
+.btn-close:active,
+.btn-icon-sm:active,
+.btn-danger-sm:active,
+.btn-stop:active,
+.btn-reset:active,
+.btn-delete-workout:active,
+.btn-back-complete:active,
+.btn-back:active,
+.btn-custom-timer:active,
+.workout-card-edit:active,
+.timer-inline-minimize:active {
+    transform: scale(0.96);
+}
+
+.btn-icon-sm {
+    background: var(--bg-elevated);
+}
+
+.btn-icon-sm svg {
+    color: var(--text-secondary);
+}
+
+.btn-icon-sm[disabled] {
+    opacity: 0.35;
+    cursor: default;
+    pointer-events: none;
+}
+
+.set-reps,
+.set-weight,
+.set-type {
+    text-decoration: underline dotted;
+    text-decoration-color: var(--text-muted);
+    text-underline-offset: 3px;
+}
+
+.set-reps:hover,
+.set-weight:hover,
+.set-type:hover {
+    text-decoration-color: var(--accent);
+}
+
+.set-row.completed .set-reps,
+.set-row.completed .set-weight {
+    text-decoration: line-through;
 }

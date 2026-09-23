@@ -76,10 +76,12 @@ const History = {
                         </div>
                     ` : ''}
                     <div class="history-exercises">
-                        ${(entry.exercises || []).map(ex => `
-                            <div class="history-exercise-row ${prKeys.has(entry.id + ':' + ex.name) ? 'is-pr' : ''}">
+                        ${(entry.exercises || []).map(ex => {
+                            const isPR = prKeys.has((entry.id || '') + ':' + ex.name);
+                            return `
+                            <div class="history-exercise-row ${isPR ? 'is-pr' : ''}">
                                 <span class="history-exercise-name">
-                                    ${prKeys.has(entry.id + ':' + ex.name) ? `
+                                    ${isPR ? `
                                         <span class="pr-trophy pr-trophy-sm" title="Recorde pessoal nesta sessao">
                                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                                 <path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0V4z"></path>
@@ -91,7 +93,8 @@ const History = {
                                 </span>
                                 <span class="history-exercise-weight">${this.formatSetInfo(ex)}</span>
                             </div>
-                        `).join('')}
+                        `;
+                        }).join('')}
                     </div>
                 </div>
             `;
@@ -105,14 +108,13 @@ const History = {
 
         sorted.forEach(entry => {
             (entry.exercises || []).forEach(ex => {
-                const max = Storage.getExerciseMaxWeight(ex, false);
+                const max = Storage.getExerciseMaxWeight(ex, true);
                 if (max <= 0) return;
                 const nameKey = String(ex.name || '').toLowerCase().trim();
                 const prev = bests[nameKey] || 0;
-                if (prev > 0 && max > prev) {
-                    keys.add(entry.id + ':' + ex.name);
-                }
+                const entryKey = (entry.id || '') + ':' + ex.name;
                 if (max > prev) {
+                    keys.add(entryKey);
                     bests[nameKey] = max;
                 }
             });

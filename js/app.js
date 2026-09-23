@@ -12,6 +12,12 @@ const App = {
         History.init();
         BodyMap.mount('body-map-container');
 
+        // Restaurar descanso persistido (continua mesmo apos reload)
+        Workout.restoreRestTimer();
+
+        // Tema claro/escuro
+        this.applyTheme(Storage.getTheme() || 'dark');
+
         // Unlock audio on first user gesture (mobile requirement)
         const unlockAudio = () => {
             AudioAlert.ensure();
@@ -29,6 +35,22 @@ const App = {
         // Add workout button
         document.getElementById('btn-add-workout').addEventListener('click', () => {
             Workout.showCreateWorkoutModal();
+        });
+
+        // Share workouts button
+        document.getElementById('btn-share-workouts').addEventListener('click', () => {
+            this.shareWorkouts();
+        });
+
+        // Theme toggle button
+        document.getElementById('btn-theme-toggle').addEventListener('click', () => {
+            this.toggleTheme();
+        });
+
+        // Active workout banner
+        document.getElementById('active-workout-banner').addEventListener('click', () => {
+            const id = document.getElementById('active-workout-banner').getAttribute('data-workout-id');
+            if (id) Workout.openWorkout(id);
         });
 
         // Home / welcome screen button
@@ -59,6 +81,7 @@ const App = {
         if (Storage.isWelcomed()) {
             this.showScreen('main');
             this.renderWorkouts();
+            this.renderActiveWorkoutBanner();
             this.updateBodyMap();
         } else {
             this.showScreen('welcome');
@@ -71,7 +94,105 @@ const App = {
         Storage.setWelcomed();
         this.showScreen('main');
         this.renderWorkouts();
+        this.renderActiveWorkoutBanner();
         this.updateBodyMap();
+    },
+
+    renderActiveWorkoutBanner() {
+        const banner = document.getElementById('active-workout-banner');
+        if (!banner) return;
+
+        const currentId = Storage.getCurrentWorkout();
+        let workout = null;
+        let hasCompleted = false;
+
+        if (currentId) {
+            workout = Storage.getWorkouts().find(w => w.id === currentId);
+            const exercises = Storage.getExercises(currentId);
+            hasCompleted = exercises.some(ex => (ex.sets || []).some(s => s.completed));
+        }
+
+        if (workout && hasCompleted) {
+            document.getElementById('active-workout-name').textContent = workout.name;
+            banner.setAttribute('data-workout-id', workout.id);
+            banner.classList.remove('hidden');
+        } else {
+            document.getElementById('active-workout-name').textContent = '';
+            banner.removeAttribute('data-workout-id');
+            banner.classList.add('hidden');
+        }
+    },
+
+    async shareWorkouts() {
+        const workouts = Storage.getWorkouts();
+        if (workouts.length === 0) {
+            this.showToast('Nenhum treino para compartilhar');
+            return;
+        }
+
+        const lines = ['*MEUS TREINOS*'];
+        workouts.forEach(workout => {
+            const exercises = Storage.getExercises(workout.id);
+            lines.push('');
+            lines.push(`*${workout.name}*${workout.subtitle ? ' — ' + workout.subtitle : ''}`);
+            if (exercises.length === 0) {
+                lines.push('• Sem exercicios');
+                return;
+            }
+            exercises.forEach(ex => {
+                const reps = (ex.sets || []).map(s => s.targetReps);
+                if (reps.length === 0) return;
+                const uniform = reps.every(r => r === reps[0]);
+                const repsStr = uniform ? `${reps[0]}` : `(${reps.join(', ')})`;
+                lines.push(`• ${ex.name} — ${reps.length}x${repsStr}`);
+            });
+        });
+        const text = lines.join('\n');
+
+        if (navigator.share) {
+            try {
+                await navigator.share({ title: 'Meus Treinos', text });
+                return;
+            } catch (e) {
+                if (e && e.name === 'AbortError') return;
+            }
+        }
+
+        try {
+            await navigator.clipboard.writeText(text);
+            this.showToast('Treinos copiados!');
+        } catch (e) {
+            const ta = document.createElement('textarea');
+            ta.value = text;
+            ta.style.position = 'fixed';
+            ta.style.opacity = '0';
+            document.body.appendChild(ta);
+            ta.select();
+            try {
+                document.execCommand('copy');
+                this.showToast('Treinos copiados!');
+            } catch (e2) {
+                this.showToast('Nao foi possivel compartilhar');
+            }
+            ta.remove();
+        }
+    },
+
+    applyTheme(theme) {
+        if (theme === 'light') {
+            document.documentElement.setAttribute('data-theme', 'light');
+        } else {
+            document.documentElement.removeAttribute('data-theme');
+        }
+        const meta = document.querySelector('meta[name="theme-color"]');
+        if (meta) meta.content = theme === 'light' ? '#F4F5F7' : '#0A0A0F';
+    },
+
+    toggleTheme() {
+        const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+        const next = isLight ? 'dark' : 'light';
+        Storage.setTheme(next);
+        this.applyTheme(next);
     },
 
     navigateToTab(tab) {
@@ -121,6 +242,7 @@ const App = {
         // Refresh data on main screen
         if (screenName === 'main') {
             this.renderWorkouts();
+            this.renderActiveWorkoutBanner();
             this.updateBodyMap();
         }
 

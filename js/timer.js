@@ -1,5 +1,7 @@
 /* ============================================
    TIMER - Contagem de descanso
+   Baseado em timestamp para nao pausar em
+   segundo plano e sobreviver a reloads.
    ============================================ */
 
 const AudioAlert = {
@@ -73,8 +75,12 @@ const Timer = {
     interval: null,
     timeRemaining: 0,
     totalTime: 0,
+    endAt: null,
     isRunning: false,
     currentExerciseId: null,
+    exerciseName: '',
+    setInfo: '',
+    finished: false,
 
     elements: {
         timerValue: null,
@@ -126,21 +132,30 @@ const Timer = {
         document.getElementById('btn-reset-timer').addEventListener('click', () => {
             this.reset();
         });
+
+        // Recalcular ao voltar ao app (evita congelar em segundo plano)
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden) this.sync();
+        });
+        window.addEventListener('focus', () => this.sync());
+
+        // Restaurar timer persistido apos reload/reabertura
+        this.restore();
     },
 
     start(seconds, exerciseName = '', setInfo = '', exerciseId = null) {
         AudioAlert.ensure();
 
-        if (this.isRunning) {
-            this.stop();
-        }
-
+        this.clearInterval_();
         this.totalTime = seconds;
         this.timeRemaining = seconds;
+        this.endAt = Date.now() + seconds * 1000;
         this.isRunning = true;
+        this.finished = false;
         this.currentExerciseId = exerciseId;
+        this.exerciseName = exerciseName;
+        this.setInfo = setInfo;
 
-        // Update exercise info
         if (this.elements.timerExerciseName) {
             this.elements.timerExerciseName.textContent = exerciseName || 'Descanso';
         }
@@ -148,43 +163,56 @@ const Timer = {
             this.elements.timerSetInfo.textContent = setInfo || `${seconds} segundos`;
         }
 
-        // Update display
-        this.updateDisplay();
-
-        // Start countdown
         this.elements.timerCircle.classList.remove('finished');
         this.elements.timerCircle.classList.add('running');
 
-        this.interval = setInterval(() => {
-            this.timeRemaining--;
+        this.saveState();
+        this.updateDisplay();
 
-            if (this.timeRemaining <= 0) {
-                this.timeRemaining = 0;
-                this.finish();
-            }
+        this.interval = setInterval(() => this.tick(), 1000);
+    },
 
-            this.updateDisplay();
-        }, 1000);
+    tick() {
+        if (!this.isRunning) return;
+
+        this.timeRemaining = Math.max(0, Math.ceil((this.endAt - Date.now()) / 1000));
+        this.updateDisplay();
+
+        if (this.timeRemaining <= 0) {
+            this.finish();
+        } else {
+            this.saveState();
+        }
+    },
+
+    sync() {
+        if (this.isRunning) {
+            this.tick();
+        }
     },
 
     stop() {
-        if (this.interval) {
-            clearInterval(this.interval);
-            this.interval = null;
+        this.clearInterval_();
+        if (this.isRunning && this.endAt) {
+            this.timeRemaining = Math.max(0, Math.ceil((this.endAt - Date.now()) / 1000));
         }
         this.isRunning = false;
+        this.endAt = null;
         this.elements.timerCircle.classList.remove('running');
+        this.saveState();
+        this.updateDisplay();
     },
 
     reset() {
-        if (this.interval) {
-            clearInterval(this.interval);
-            this.interval = null;
-        }
+        this.clearInterval_();
         this.timeRemaining = 0;
         this.totalTime = 0;
+        this.endAt = null;
         this.isRunning = false;
+        this.finished = false;
         this.currentExerciseId = null;
+        this.exerciseName = '';
+        this.setInfo = '';
 
         this.elements.timerCircle.classList.remove('running', 'finished');
         this.updateDisplay();
@@ -195,11 +223,20 @@ const Timer = {
         if (this.elements.timerSetInfo) {
             this.elements.timerSetInfo.textContent = '';
         }
+
+        Storage.clearTimerState();
     },
 
     finish() {
-        this.stop();
+        this.clearInterval_();
+        this.timeRemaining = 0;
+        this.isRunning = false;
+        this.endAt = null;
+        this.finished = true;
+        this.elements.timerCircle.classList.remove('running');
         this.elements.timerCircle.classList.add('finished');
+        this.updateDisplay();
+        Storage.clearTimerState();
         this.playAlert();
 
         if (this.callbacks.onFinish) {
@@ -214,6 +251,66 @@ const Timer = {
 
         if (this.elements.timerValue) {
             this.elements.timerValue.textContent = display;
+        }
+    },
+
+    saveState() {
+        if (this.totalTime <= 0 && !this.isRunning) {
+            Storage.clearTimerState();
+            return;
+        }
+        Storage.setTimerState({
+            running: this.isRunning,
+            endAt: this.endAt,
+            remaining: this.timeRemaining,
+            totalTime: this.totalTime,
+            exerciseName: this.exerciseName,
+            setInfo: this.setInfo,
+            currentExerciseId: this.currentExerciseId
+        });
+    },
+
+    restore() {
+        const state = Storage.getTimerState();
+        if (!state) return;
+
+        this.totalTime = state.totalTime || 0;
+        this.exerciseName = state.exerciseName || '';
+        this.setInfo = state.setInfo || '';
+        this.currentExerciseId = state.currentExerciseId || null;
+
+        if (this.elements.timerExerciseName) {
+            this.elements.timerExerciseName.textContent = this.exerciseName || 'Descanso';
+        }
+        if (this.elements.timerSetInfo) {
+            this.elements.timerSetInfo.textContent = this.setInfo || '';
+        }
+
+        if (state.running && state.endAt) {
+            this.endAt = state.endAt;
+            this.isRunning = true;
+            this.timeRemaining = Math.max(0, Math.ceil((state.endAt - Date.now()) / 1000));
+            this.elements.timerCircle.classList.remove('finished');
+            this.elements.timerCircle.classList.add('running');
+            this.updateDisplay();
+
+            if (this.timeRemaining <= 0) {
+                this.finish();
+            } else {
+                this.interval = setInterval(() => this.tick(), 1000);
+            }
+        } else {
+            this.timeRemaining = state.remaining || 0;
+            this.isRunning = false;
+            this.endAt = null;
+            this.updateDisplay();
+        }
+    },
+
+    clearInterval_() {
+        if (this.interval) {
+            clearInterval(this.interval);
+            this.interval = null;
         }
     },
 

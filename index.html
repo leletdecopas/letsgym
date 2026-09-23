@@ -18,7 +18,16 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <link rel="stylesheet" href="css/style.css?v=5">
+    <script>
+        (function () {
+            try {
+                if (localStorage.getItem('gymtracker_theme') === '"light"') {
+                    document.documentElement.setAttribute('data-theme', 'light');
+                }
+            } catch (e) {}
+        })();
+    </script>
+    <link rel="stylesheet" href="css/style.css?v=6">
 </head>
 <body>
     <div id="app">
@@ -56,16 +65,53 @@
                     </svg>
                     <span class="app-logo-text">LetsGym</span>
                 </div>
-                <button id="btn-home" class="btn-home" title="Tela de Início">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-                        <polyline points="9 22 9 12 15 12 15 22"></polyline>
-                    </svg>
-                    <span class="btn-home-label">Tela de Início</span>
-                </button>
+                <div class="header-actions">
+                    <button id="btn-theme-toggle" class="btn-home btn-theme-toggle" title="Alternar tema claro/escuro">
+                        <svg class="theme-icon theme-icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                        </svg>
+                        <svg class="theme-icon theme-icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="5"></circle>
+                            <line x1="12" y1="1" x2="12" y2="3"></line>
+                            <line x1="12" y1="21" x2="12" y2="23"></line>
+                            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                            <line x1="1" y1="12" x2="3" y2="12"></line>
+                            <line x1="21" y1="12" x2="23" y2="12"></line>
+                            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                        </svg>
+                    </button>
+                    <button id="btn-home" class="btn-home" title="Tela de Início">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                            <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                        </svg>
+                        <span class="btn-home-label">Tela de Início</span>
+                    </button>
+                </div>
             </header>
 
             <div class="main-content">
+                <div id="active-workout-banner" class="active-workout-banner hidden" role="button" tabindex="0">
+                    <div class="banner-info">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <polyline points="12 6 12 12 16 14"></polyline>
+                        </svg>
+                        <div class="banner-texts">
+                            <span class="banner-label">Treino em andamento</span>
+                            <span class="banner-name" id="active-workout-name"></span>
+                        </div>
+                    </div>
+                    <span class="banner-cta">
+                        Continuar
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="9 18 15 12 9 6"></polyline>
+                        </svg>
+                    </span>
+                </div>
+
                 <section class="body-map-section">
                     <div class="section-header">
                         <span class="section-title">Musculos Treinados na Semana</span>
@@ -78,13 +124,25 @@
                 <section class="workouts-section">
                     <div class="section-header">
                         <span class="section-title">Seus Treinos</span>
-                        <button id="btn-add-workout" class="btn-add-workout" title="Novo treino">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                                <line x1="12" y1="5" x2="12" y2="19"></line>
-                                <line x1="5" y1="12" x2="19" y2="12"></line>
-                            </svg>
-                            Novo
-                        </button>
+                        <div class="section-actions">
+                            <button id="btn-share-workouts" class="btn-add-workout" title="Compartilhar treinos">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="18" cy="5" r="3"></circle>
+                                    <circle cx="6" cy="12" r="3"></circle>
+                                    <circle cx="18" cy="19" r="3"></circle>
+                                    <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+                                    <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+                                </svg>
+                                Compartilhar
+                            </button>
+                            <button id="btn-add-workout" class="btn-add-workout" title="Novo treino">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                                </svg>
+                                Novo
+                            </button>
+                        </div>
                     </div>
                     <div id="workouts-list" class="workouts-list"></div>
                 </section>
@@ -114,6 +172,15 @@
             </header>
 
             <div class="main-content">
+                <div class="workout-progress">
+                    <div class="workout-progress-info">
+                        <span class="workout-progress-label">Progresso do treino</span>
+                        <span class="workout-progress-text" id="workout-progress-text">0/0</span>
+                    </div>
+                    <div class="progress-bar workout-progress-bar">
+                        <div class="progress-fill" id="workout-progress-fill" style="width: 0%"></div>
+                    </div>
+                </div>
                 <div id="exercises-list" class="exercises-list"></div>
                 <button id="btn-add-exercise" class="btn-add-exercise">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -310,7 +377,7 @@
                     <h3>Finalizar Treino?</h3>
                 </div>
                 <div class="modal-body">
-                    <p style="color: var(--text-secondary);">Os dados serao salvos no historico.</p>
+                    <p id="finish-modal-message" style="color: var(--text-secondary);">Os dados serao salvos no historico.</p>
                 </div>
                 <div class="modal-footer">
                     <button id="btn-cancel-finish" class="btn-secondary">Cancelar</button>
@@ -385,11 +452,11 @@
         </div>
     </div>
 
-    <script src="js/storage.js?v=5"></script>
-    <script src="js/bodyMap.js?v=5"></script>
-    <script src="js/timer.js?v=5"></script>
-    <script src="js/workout.js?v=5"></script>
-    <script src="js/history.js?v=5"></script>
-    <script src="js/app.js?v=5"></script>
+    <script src="js/storage.js?v=6"></script>
+    <script src="js/bodyMap.js?v=6"></script>
+    <script src="js/timer.js?v=6"></script>
+    <script src="js/workout.js?v=6"></script>
+    <script src="js/history.js?v=6"></script>
+    <script src="js/app.js?v=6"></script>
 </body>
 </html>

@@ -6,7 +6,8 @@ const Workout = {
     currentWorkoutId: null,
     editingExerciseId: null,
     editingWorkoutId: null,
-    activeTimerExerciseId: null,
+    restTimer: null,
+    restInterval: null,
 
     muscleNames: {
         chest: 'Peito',
@@ -84,6 +85,14 @@ const Workout = {
         document.getElementById('edit-workout-modal').addEventListener('click', (e) => {
             if (e.target.id === 'edit-workout-modal') this.hideEditWorkoutModal();
         });
+
+        // Recalcular descanso ao voltar ao app (timer nao congela em segundo plano)
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden && this.restTimer) this.syncRestTimer();
+        });
+        window.addEventListener('focus', () => {
+            if (this.restTimer) this.syncRestTimer();
+        });
     },
 
     openWorkout(workoutId) {
@@ -113,6 +122,8 @@ const Workout = {
         const container = document.getElementById('exercises-list');
         const exercises = Storage.getExercises(this.currentWorkoutId);
 
+        this.updateWorkoutProgress();
+
         if (exercises.length === 0) {
             container.innerHTML = `
                 <div class="empty-state" style="padding: 3rem 1rem;">
@@ -126,19 +137,19 @@ const Workout = {
                     <p class="empty-state-text">Adicione exercicios para comecar!</p>
                 </div>
             `;
+            this.restoreRestTimer();
             return;
         }
 
-        container.innerHTML = exercises.map(exercise => this.renderExerciseCard(exercise)).join('');
+        container.innerHTML = exercises.map((exercise, index) =>
+            this.renderExerciseCard(exercise, index, exercises.length)
+        ).join('');
+
+        this.restoreRestTimer();
     },
 
-    renderExerciseCard(exercise) {
-        const completedCount = exercise.sets.filter(s => s.completed).length;
-        const totalCount = exercise.sets.length;
-        const bestWeight = Storage.getExerciseMaxWeight(exercise);
-        const previousBest = bestWeight > 0 ? Storage.getBestWeight(exercise.name) : 0;
-        const isPR = previousBest > 0 && bestWeight > previousBest;
-        const prDelta = isPR ? Math.round((bestWeight - previousBest) * 100) / 100 : 0;
+    renderExerciseCard(exercise, index = 0, total = 1) {
+        const prInfo = this.getExercisePR(exercise);
 
         const setsRows = exercise.sets.map((set, index) => {
             const typeInfo = this.setTypes[set.type] || this.setTypes.normal;
@@ -167,20 +178,13 @@ const Workout = {
                 <div class="exercise-header">
                     <div class="exercise-title-row">
                         <span class="exercise-name">${exercise.name}</span>
-                        ${isPR ? `
-                            <span class="pr-trophy" title="Novo recorde! +${prDelta}kg vs anterior">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0V4z"></path>
-                                    <path d="M17 5h2a2 2 0 0 1 0 4h-2M7 5H5a2 2 0 0 0 0 4h2"></path>
-                                </svg>
-                            </span>
-                        ` : ''}
+                        ${this.getTrophyHTML(prInfo)}
                         <span class="exercise-muscle-tag">${this.muscleNames[exercise.muscle] || exercise.muscle}</span>
                     </div>
                     <div class="exercise-progress">
-                        <span class="progress-text">${completedCount}/${totalCount}</span>
+                        <span class="progress-text">${prInfo.completedCount}/${prInfo.totalCount}</span>
                         <div class="progress-bar">
-                            <div class="progress-fill" style="width: ${totalCount > 0 ? (completedCount / totalCount * 100) : 0}%"></div>
+                            <div class="progress-fill" style="width: ${prInfo.totalCount > 0 ? (prInfo.completedCount / prInfo.totalCount * 100) : 0}%"></div>
                         </div>
                     </div>
                 </div>
@@ -216,6 +220,16 @@ const Workout = {
                         <span>Descanso: ${exercise.restTime || 90}s</span>
                     </div>
                     <div class="exercise-actions-inline">
+                        <button class="btn-icon-sm" onclick="Workout.moveExercise('${exercise.id}', -1)" title="Mover para cima" ${index === 0 ? 'disabled' : ''}>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="18 15 12 9 6 15"></polyline>
+                            </svg>
+                        </button>
+                        <button class="btn-icon-sm" onclick="Workout.moveExercise('${exercise.id}', 1)" title="Mover para baixo" ${index === total - 1 ? 'disabled' : ''}>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="6 9 12 15 18 9"></polyline>
+                            </svg>
+                        </button>
                         <button class="btn-icon-sm" onclick="Workout.editExercise('${exercise.id}')" title="Editar exercicio">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
@@ -236,34 +250,197 @@ const Workout = {
         `;
     },
 
+    getExercisePR(exercise) {
+        const completedCount = exercise.sets.filter(s => s.completed).length;
+        const totalCount = exercise.sets.length;
+        const bestWeight = Storage.getExerciseMaxWeight(exercise, true);
+        const previousBest = Storage.getBestWeight(exercise.name);
+        const isPR = bestWeight > 0 && bestWeight > previousBest;
+        const prDelta = isPR ? Math.round((bestWeight - previousBest) * 100) / 100 : 0;
+        return { completedCount, totalCount, bestWeight, previousBest, isPR, prDelta };
+    },
+
+    getTrophyHTML(prInfo) {
+        if (!prInfo.isPR) return '';
+        const title = prInfo.previousBest > 0
+            ? `Novo recorde! +${prInfo.prDelta}kg vs anterior`
+            : `Primeiro recorde! ${prInfo.bestWeight}kg`;
+        return `
+            <span class="pr-trophy" title="${title}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0V4z"></path>
+                    <path d="M17 5h2a2 2 0 0 1 0 4h-2M7 5H5a2 2 0 0 0 0 4h2"></path>
+                </svg>
+            </span>
+        `;
+    },
+
+    updateWorkoutProgress() {
+        const exercises = Storage.getExercises(this.currentWorkoutId);
+        let done = 0;
+        let total = 0;
+        exercises.forEach(ex => {
+            total += ex.sets.length;
+            done += ex.sets.filter(s => s.completed).length;
+        });
+
+        const fill = document.getElementById('workout-progress-fill');
+        const text = document.getElementById('workout-progress-text');
+        if (fill) fill.style.width = (total > 0 ? (done / total * 100) : 0) + '%';
+        if (text) text.textContent = `${done}/${total}`;
+    },
+
     toggleSet(exerciseId, setId, checked) {
         const result = Storage.toggleSet(this.currentWorkoutId, exerciseId, setId);
         if (!result) return;
 
         const { exercise, set } = result;
 
-        // Update UI
-        this.renderExercises();
+        // Atualiza o card in-place para a barra animar e os timers nao sumirem
+        const row = document.querySelector(`.set-row[data-set-id="${set.id}"]`);
+        if (row) row.classList.toggle('completed', set.completed);
+
+        const card = document.querySelector(`.exercise-card[data-exercise-id="${exercise.id}"]`);
+        if (card) {
+            const prInfo = this.getExercisePR(exercise);
+            const textEl = card.querySelector('.progress-text');
+            const fillEl = card.querySelector('.progress-fill');
+            if (textEl) textEl.textContent = `${prInfo.completedCount}/${prInfo.totalCount}`;
+            if (fillEl) fillEl.style.width = (prInfo.totalCount > 0 ? (prInfo.completedCount / prInfo.totalCount * 100) : 0) + '%';
+
+            const titleRow = card.querySelector('.exercise-title-row');
+            const tag = titleRow ? titleRow.querySelector('.exercise-muscle-tag') : null;
+            const existingTrophy = titleRow ? titleRow.querySelector('.pr-trophy') : null;
+            if (prInfo.isPR && !existingTrophy && tag) {
+                tag.insertAdjacentHTML('beforebegin', this.getTrophyHTML(prInfo));
+            } else if (!prInfo.isPR && existingTrophy) {
+                existingTrophy.remove();
+            }
+        }
+
+        this.updateWorkoutProgress();
         BodyMap.setActive('body-map-container', this.getWorkoutMuscles(this.currentWorkoutId));
 
-        // Start timer if set was completed
+        // Descanso por timestamp: continua em segundo plano e apos reload
         if (set.completed) {
-            this.startInlineTimer(exercise, set);
-        } else {
-            this.stopInlineTimer(exerciseId);
+            this.startRestTimer(exercise);
+        } else if (this.restTimer && this.restTimer.exerciseId === exerciseId) {
+            this.cancelRestTimer(false);
         }
     },
 
-    startInlineTimer(exercise, set) {
-        const timerContainer = document.getElementById(`timer-inline-${exercise.id}`);
-        if (!timerContainer) return;
-
-        this.activeTimerExerciseId = exercise.id;
+    startRestTimer(exercise) {
         const restTime = exercise.restTime || 90;
+        this.restTimer = {
+            exerciseId: exercise.id,
+            exerciseName: exercise.name,
+            total: restTime,
+            endAt: Date.now() + restTime * 1000
+        };
+        Storage.setRestTimerState(this.restTimer);
+        this.ensureRestInterval();
+        this.renderRestTimerUI();
+    },
+
+    ensureRestInterval() {
+        if (this.restInterval) return;
+        this.restInterval = setInterval(() => this.syncRestTimer(), 500);
+    },
+
+    clearRestInterval() {
+        if (this.restInterval) {
+            clearInterval(this.restInterval);
+            this.restInterval = null;
+        }
+    },
+
+    syncRestTimer() {
+        if (!this.restTimer) {
+            this.clearRestInterval();
+            return;
+        }
+        const remaining = Math.ceil((this.restTimer.endAt - Date.now()) / 1000);
+        if (remaining <= 0) {
+            this.completeRestTimer();
+            return;
+        }
+        const el = document.getElementById(`timer-countdown-${this.restTimer.exerciseId}`);
+        if (el) el.textContent = this.formatTime(remaining);
+    },
+
+    completeRestTimer() {
+        const timer = this.restTimer;
+        this.clearRestInterval();
+        this.restTimer = null;
+        Storage.clearRestTimerState();
+        if (!timer) return;
+
+        const timerContainer = document.getElementById(`timer-inline-${timer.exerciseId}`);
+        if (timerContainer) {
+            const timerInline = timerContainer.querySelector('.timer-inline');
+            if (timerInline) timerInline.classList.add('completed');
+        }
+
+        this.playAlert();
+        App.showToast('Descanso finalizado! Proxima serie.');
+
+        setTimeout(() => {
+            const container = document.getElementById(`timer-inline-${timer.exerciseId}`);
+            if (container) {
+                container.classList.add('hidden');
+                container.innerHTML = '';
+            }
+        }, 3000);
+    },
+
+    cancelRestTimer(showToast = true) {
+        const timer = this.restTimer;
+        this.clearRestInterval();
+        this.restTimer = null;
+        Storage.clearRestTimerState();
+
+        if (timer) {
+            const container = document.getElementById(`timer-inline-${timer.exerciseId}`);
+            if (container) {
+                container.classList.add('hidden');
+                container.innerHTML = '';
+            }
+        }
+        if (showToast) App.showToast('Descanso cancelado');
+    },
+
+    restoreRestTimer() {
+        if (!this.restTimer) {
+            const state = Storage.getRestTimerState();
+            if (state) this.restTimer = state;
+        }
+        if (!this.restTimer) return;
+
+        const remaining = Math.ceil((this.restTimer.endAt - Date.now()) / 1000);
+        if (remaining <= 0) {
+            this.completeRestTimer();
+        } else {
+            this.ensureRestInterval();
+            this.renderRestTimerUI();
+        }
+    },
+
+    renderRestTimerUI() {
+        if (!this.restTimer) return;
+
+        const { exerciseId, total } = this.restTimer;
+        const container = document.getElementById(`timer-inline-${exerciseId}`);
+        if (!container) return;
+
+        const exercises = Storage.getExercises(this.currentWorkoutId);
+        const exercise = exercises.find(e => e.id === exerciseId);
+        if (!exercise) return;
+
         const completedSets = exercise.sets.filter(s => s.completed).length;
         const totalSets = exercise.sets.length;
+        const remaining = Math.max(0, Math.ceil((this.restTimer.endAt - Date.now()) / 1000));
 
-        timerContainer.innerHTML = `
+        container.innerHTML = `
             <div class="timer-inline">
                 <div class="timer-inline-info">
                     <div class="timer-inline-icon">
@@ -277,81 +454,22 @@ const Workout = {
                         <span class="timer-inline-set">Serie ${completedSets}/${totalSets}</span>
                     </div>
                 </div>
-                <div class="timer-inline-countdown" id="timer-countdown-${exercise.id}">${this.formatTime(restTime)}</div>
-                <button class="timer-inline-minimize" onclick="Workout.minimizeTimer('${exercise.id}')" title="Minimizar">
+                <div class="timer-inline-countdown" id="timer-countdown-${exerciseId}">${this.formatTime(remaining)}</div>
+                <button class="timer-inline-minimize" onclick="Workout.cancelRestTimer()" title="Cancelar descanso">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <polyline points="6 9 12 15 18 9"></polyline>
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
                     </svg>
                 </button>
             </div>
         `;
-        timerContainer.classList.remove('hidden');
-
-        // Start countdown
-        this.startTimerCountdown(exercise.id, restTime);
+        container.classList.remove('hidden');
     },
 
-    startTimerCountdown(exerciseId, seconds) {
-        let remaining = seconds;
-        const countdownEl = document.getElementById(`timer-countdown-${exerciseId}`);
-
-        // Clear any existing interval
-        if (this[`timerInterval_${exerciseId}`]) {
-            clearInterval(this[`timerInterval_${exerciseId}`]);
+    moveExercise(exerciseId, direction) {
+        if (Storage.moveExercise(this.currentWorkoutId, exerciseId, direction)) {
+            this.renderExercises();
         }
-
-        this[`timerInterval_${exerciseId}`] = setInterval(() => {
-            remaining--;
-            if (countdownEl) {
-                countdownEl.textContent = this.formatTime(remaining);
-            }
-
-            if (remaining <= 0) {
-                clearInterval(this[`timerInterval_${exerciseId}`]);
-                this.onTimerComplete(exerciseId);
-            }
-        }, 1000);
-    },
-
-    onTimerComplete(exerciseId) {
-        const timerContainer = document.getElementById(`timer-inline-${exerciseId}`);
-        if (timerContainer) {
-            const timerInline = timerContainer.querySelector('.timer-inline');
-            if (timerInline) {
-                timerInline.classList.add('completed');
-            }
-        }
-
-        // Play alert sound
-        this.playAlert();
-
-        // Show toast
-        App.showToast('Descanso finalizado! Proxima serie.');
-
-        // Auto-hide after 3 seconds
-        setTimeout(() => {
-            this.stopInlineTimer(exerciseId);
-        }, 3000);
-    },
-
-    stopInlineTimer(exerciseId) {
-        if (this[`timerInterval_${exerciseId}`]) {
-            clearInterval(this[`timerInterval_${exerciseId}`]);
-            delete this[`timerInterval_${exerciseId}`];
-        }
-
-        const timerContainer = document.getElementById(`timer-inline-${exerciseId}`);
-        if (timerContainer) {
-            timerContainer.classList.add('hidden');
-            timerContainer.innerHTML = '';
-        }
-
-        this.activeTimerExerciseId = null;
-    },
-
-    minimizeTimer(exerciseId) {
-        this.stopInlineTimer(exerciseId);
-        App.showToast('Timer minimizado');
     },
 
     formatTime(seconds) {
@@ -519,6 +637,21 @@ const Workout = {
 
     // Finish Workout
     showFinishModal() {
+        const exercises = Storage.getExercises(this.currentWorkoutId);
+        let total = 0;
+        let done = 0;
+        exercises.forEach(ex => {
+            total += ex.sets.length;
+            done += ex.sets.filter(s => s.completed).length;
+        });
+        const pending = total - done;
+
+        const msgEl = document.getElementById('finish-modal-message');
+        if (msgEl) {
+            msgEl.textContent = pending > 0
+                ? `Você ainda tem ${pending} series pendente${pending > 1 ? 's' : ''}, deseja finalizar mesmo assim?`
+                : 'Os dados serao salvos no historico.';
+        }
         document.getElementById('finish-modal').classList.add('active');
     },
 
@@ -527,10 +660,20 @@ const Workout = {
     },
 
     finishWorkout() {
+        if (!this.currentWorkoutId) {
+            App.showToast('Nenhum treino em andamento');
+            this.hideFinishModal();
+            return;
+        }
+
         const exercises = Storage.getExercises(this.currentWorkoutId);
         const workouts = Storage.getWorkouts();
         const workout = workouts.find(w => w.id === this.currentWorkoutId);
-        if (!workout) return;
+        if (!workout) {
+            App.showToast('Treino nao encontrado');
+            this.hideFinishModal();
+            return;
+        }
 
         const muscles = this.getWorkoutMuscles(this.currentWorkoutId);
 
@@ -546,7 +689,6 @@ const Workout = {
             }))
         }));
 
-        // Reset all sets so the workout is fresh next time
         const sessionPRs = Storage.getPRsForSession(exercises);
 
         Storage.addHistoryEntry({
@@ -557,6 +699,9 @@ const Workout = {
         });
 
         Storage.resetWorkoutSets(this.currentWorkoutId);
+        Storage.clearCurrentWorkout();
+        this.cancelRestTimer(false);
+        Timer.reset();
 
         this.hideFinishModal();
         this.showCompleteScreen(workout.name, muscles, sessionPRs);
@@ -580,7 +725,7 @@ const Workout = {
                         <path d="M17 5h2a2 2 0 0 1 0 4h-2M7 5H5a2 2 0 0 0 0 4h2"></path>
                     </svg>
                     <span class="pr-item-name">${pr.name}</span>
-                    <span class="pr-item-weight">${pr.weight}kg <span class="pr-item-delta">+${pr.delta}kg</span></span>
+                    <span class="pr-item-weight">${pr.weight}kg ${pr.previous > 0 ? `<span class="pr-item-delta">+${pr.delta}kg</span>` : '<span class="pr-item-delta">novo!</span>'}</span>
                 </div>
             `).join('');
             prContainer.classList.remove('hidden');

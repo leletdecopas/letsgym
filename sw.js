@@ -1,4 +1,4 @@
-const CACHE_NAME = 'letsgym-v6';
+const CACHE_NAME = 'letsgym-v7';
 const urlsToCache = [
     './',
     './index.html',
@@ -41,7 +41,7 @@ self.addEventListener('activate', event => {
 
 self.addEventListener('fetch', event => {
     event.respondWith(
-        caches.match(event.request)
+        caches.match(event.request, { ignoreSearch: true })
             .then(response => {
                 if (response) {
                     return response;

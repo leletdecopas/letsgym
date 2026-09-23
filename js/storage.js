@@ -8,7 +8,10 @@ const Storage = {
         WORKOUTS: 'gymtracker_workouts',
         EXERCISES: 'gymtracker_exercises',
         HISTORY: 'gymtracker_history',
-        CURRENT_WORKOUT: 'gymtracker_current_workout'
+        CURRENT_WORKOUT: 'gymtracker_current_workout',
+        TIMER: 'gymtracker_timer',
+        REST_TIMER: 'gymtracker_rest_timer',
+        THEME: 'gymtracker_theme'
     },
 
     get(key) {
@@ -183,6 +186,17 @@ const Storage = {
         this.saveExercises(workoutId, filtered);
     },
 
+    moveExercise(workoutId, exerciseId, direction) {
+        const exercises = this.getExercises(workoutId);
+        const index = exercises.findIndex(e => e.id === exerciseId);
+        const target = index + direction;
+        if (index === -1 || target < 0 || target >= exercises.length) return false;
+        const [moved] = exercises.splice(index, 1);
+        exercises.splice(target, 0, moved);
+        this.saveExercises(workoutId, exercises);
+        return true;
+    },
+
     toggleSet(workoutId, exerciseId, setId) {
         const exercises = this.getExercises(workoutId);
         const exercise = exercises.find(e => e.id === exerciseId);
@@ -297,7 +311,7 @@ const Storage = {
         this.getHistory().forEach(entry => {
             (entry.exercises || []).forEach(ex => {
                 if (String(ex.name || '').toLowerCase().trim() !== name) return;
-                const max = this.getExerciseMaxWeight(ex, false);
+                const max = this.getExerciseMaxWeight(ex, true);
                 if (max > best) best = max;
             });
         });
@@ -310,7 +324,7 @@ const Storage = {
             const current = this.getExerciseMaxWeight(ex, true);
             if (current <= 0) return;
             const previous = this.getBestWeight(ex.name);
-            if (previous > 0 && current > previous) {
+            if (current > previous) {
                 prs.push({
                     name: ex.name,
                     weight: current,
@@ -332,5 +346,37 @@ const Storage = {
 
     clearCurrentWorkout() {
         this.remove(this.KEYS.CURRENT_WORKOUT);
+    },
+
+    getTimerState() {
+        return this.get(this.KEYS.TIMER);
+    },
+
+    setTimerState(state) {
+        this.set(this.KEYS.TIMER, state);
+    },
+
+    clearTimerState() {
+        this.remove(this.KEYS.TIMER);
+    },
+
+    getRestTimerState() {
+        return this.get(this.KEYS.REST_TIMER);
+    },
+
+    setRestTimerState(state) {
+        this.set(this.KEYS.REST_TIMER, state);
+    },
+
+    clearRestTimerState() {
+        this.remove(this.KEYS.REST_TIMER);
+    },
+
+    getTheme() {
+        return this.get(this.KEYS.THEME);
+    },
+
+    setTheme(theme) {
+        this.set(this.KEYS.THEME, theme);
     }
 };

@@ -1,9 +1,10 @@
-const CACHE_NAME = 'letsgym-v7';
+const CACHE_NAME = 'letsgym-v8';
 const urlsToCache = [
     './',
     './index.html',
     './css/style.css',
     './js/storage.js',
+    './js/bodyPaths.js',
     './js/bodyMap.js',
     './js/timer.js',
     './js/workout.js',

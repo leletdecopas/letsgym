@@ -387,7 +387,7 @@ body {
 .body-map-svg {
     display: block;
     width: 100%;
-    max-width: 260px;
+    max-width: 480px;
     height: auto;
     margin: 0 auto;
 }
@@ -395,27 +395,21 @@ body {
 .body-map-svg .bm-base {
     fill: var(--bm-base);
     stroke: var(--bm-stroke);
-    stroke-width: 1;
+    stroke-width: 3;
     stroke-linejoin: round;
 }
 
 .body-map-svg .muscle {
     fill: var(--bm-muscle);
     stroke: var(--bm-stroke);
-    stroke-width: 1;
+    stroke-width: 3;
     stroke-linejoin: round;
     transition: fill 0.3s ease, stroke 0.3s ease;
     cursor: pointer;
 }
 
-.body-map-svg .muscle-detail {
-    fill: none;
-    stroke: var(--bm-line);
-    stroke-width: 0.9;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-    pointer-events: none;
-    transition: stroke 0.3s ease;
+.body-map-svg .muscle-idle {
+    cursor: default;
 }
 
 .body-map-svg .muscle.active {
@@ -424,17 +418,44 @@ body {
     filter: drop-shadow(0 0 6px var(--map-glow));
 }
 
-.body-map-svg .muscle.active .muscle-detail {
-    stroke: rgba(0, 0, 0, 0.4);
-}
-
 .body-map-svg .muscle:hover {
     stroke: var(--map-highlight);
-    stroke-width: 1.5;
+    stroke-width: 4;
+}
+
+.body-map-svg .muscle-idle:hover {
+    stroke: var(--bm-stroke);
+    stroke-width: 3;
+}
+
+.body-sex-toggle {
+    display: inline-flex;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+}
+
+.body-sex-btn {
+    min-width: 2rem;
+    padding: 0.35rem 0.55rem;
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font-family: var(--font);
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.body-sex-btn.active {
+    background: var(--map-highlight);
+    color: #fff;
 }
 
 .body-map-label {
-    font-size: 8px;
+    font-size: 42px;
     fill: var(--text-muted);
     text-anchor: middle;
     font-family: var(--font);
@@ -951,10 +972,14 @@ body {
    ============================================ */
 .history-filters {
     margin-bottom: 1rem;
+    display: flex;
+    gap: 0.6rem;
+    align-items: stretch;
 }
 
 .history-filters select {
-    width: 100%;
+    flex: 1;
+    min-width: 0;
     padding: 0.85rem 1rem;
     background: var(--bg-card);
     border: 1px solid var(--border);
@@ -975,6 +1000,31 @@ body {
 .history-filters select:focus {
     outline: none;
     border-color: var(--accent);
+}
+
+.btn-clear-history {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0 0.9rem;
+    background: var(--danger-soft);
+    border: 1px solid transparent;
+    border-radius: var(--radius);
+    color: var(--danger);
+    font-size: 0.85rem;
+    font-weight: 600;
+    font-family: var(--font);
+    cursor: pointer;
+    transition: var(--transition);
+    white-space: nowrap;
+}
+
+.btn-clear-history:hover {
+    background: rgba(239, 68, 68, 0.2);
+}
+
+.btn-clear-history.hidden {
+    display: none;
 }
 
 .history-list {
@@ -998,7 +1048,7 @@ body {
 .history-item-header {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    gap: 0.5rem;
     margin-bottom: 0.75rem;
 }
 
@@ -1009,8 +1059,13 @@ body {
 }
 
 .history-item-date {
+    margin-left: auto;
     font-size: 0.8rem;
     color: var(--text-muted);
+}
+
+.history-delete-btn {
+    flex-shrink: 0;
 }
 
 .history-item-muscles {

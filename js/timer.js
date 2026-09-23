@@ -6,6 +6,7 @@
 
 const AudioAlert = {
     ctx: null,
+    pending: false,
 
     ensure() {
         if (!this.ctx) {
@@ -21,6 +22,29 @@ const AudioAlert = {
         return this.ctx;
     },
 
+    unlock() {
+        const ctx = this.ensure();
+        if (!ctx) return null;
+        try {
+            if (ctx.state === 'suspended') {
+                ctx.resume().catch(() => {});
+            }
+            if (ctx.state === 'running' && !this._silentPlayed) {
+                this._silentPlayed = true;
+                const buffer = ctx.createBuffer(1, 1, 22050);
+                const source = ctx.createBufferSource();
+                source.buffer = buffer;
+                source.connect(ctx.destination);
+                source.start(0);
+            }
+        } catch (e) {}
+        return ctx;
+    },
+
+    isReady() {
+        return !!this.ctx && this.ctx.state === 'running';
+    },
+
     vibrate() {
         try {
             if (navigator.vibrate) navigator.vibrate([200, 100, 200, 100, 300]);
@@ -29,21 +53,46 @@ const AudioAlert = {
 
     play() {
         this.vibrate();
-        const ctx = this.ensure();
-        if (!ctx) return;
+        const ctx = this.unlock();
+        if (!ctx) {
+            this.pending = true;
+            return;
+        }
 
-        const playWhenReady = () => {
-            if (ctx.state !== 'running') {
-                ctx.resume().then(() => this.beeps(ctx)).catch(() => {});
+        const attempt = () => {
+            if (ctx.state === 'running') {
+                this.pending = false;
+                this.beeps(ctx);
                 return;
             }
-            this.beeps(ctx);
+            ctx.resume().then(() => {
+                if (ctx.state === 'running') {
+                    this.pending = false;
+                    this.beeps(ctx);
+                } else {
+                    this.pending = true;
+                }
+            }).catch(() => {
+                this.pending = true;
+            });
         };
 
         if (ctx.state === 'suspended') {
-            ctx.resume().then(playWhenReady).catch(() => {});
+            ctx.resume().then(attempt).catch(() => {
+                this.pending = true;
+            });
         } else {
-            playWhenReady();
+            attempt();
+        }
+    },
+
+    flushPending() {
+        if (!this.pending) return;
+        const ctx = this.unlock();
+        if (ctx && ctx.state === 'running') {
+            this.pending = false;
+            this.beeps(ctx);
+            this.vibrate();
         }
     },
 
@@ -135,16 +184,24 @@ const Timer = {
 
         // Recalcular ao voltar ao app (evita congelar em segundo plano)
         document.addEventListener('visibilitychange', () => {
-            if (!document.hidden) this.sync();
+            if (!document.hidden) {
+                AudioAlert.unlock();
+                AudioAlert.flushPending();
+                this.sync();
+            }
         });
-        window.addEventListener('focus', () => this.sync());
+        window.addEventListener('focus', () => {
+            AudioAlert.unlock();
+            AudioAlert.flushPending();
+            this.sync();
+        });
 
         // Restaurar timer persistido apos reload/reabertura
         this.restore();
     },
 
     start(seconds, exerciseName = '', setInfo = '', exerciseId = null) {
-        AudioAlert.ensure();
+        AudioAlert.unlock();
 
         this.clearInterval_();
         this.totalTime = seconds;

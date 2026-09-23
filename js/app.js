@@ -18,11 +18,10 @@ const App = {
         // Tema claro/escuro
         this.applyTheme(Storage.getTheme() || 'dark');
 
-        // Unlock audio on first user gesture (mobile requirement)
+        // Unlock audio and flush pending alerts on user gesture
         const unlockAudio = () => {
-            AudioAlert.ensure();
-            document.removeEventListener('click', unlockAudio);
-            document.removeEventListener('touchstart', unlockAudio);
+            AudioAlert.unlock();
+            AudioAlert.flushPending();
         };
         document.addEventListener('click', unlockAudio);
         document.addEventListener('touchstart', unlockAudio);
@@ -45,6 +44,21 @@ const App = {
         // Theme toggle button
         document.getElementById('btn-theme-toggle').addEventListener('click', () => {
             this.toggleTheme();
+        });
+
+        // Body sex toggle
+        const initialSex = Storage.getBodySex();
+        document.querySelectorAll('.body-sex-btn').forEach(b => {
+            b.classList.toggle('active', b.getAttribute('data-sex') === initialSex);
+            b.addEventListener('click', () => {
+                const sex = b.getAttribute('data-sex');
+                Storage.setBodySex(sex);
+                document.querySelectorAll('.body-sex-btn').forEach(x => {
+                    x.classList.toggle('active', x === b);
+                });
+                BodyMap.setSex(sex);
+                this.updateBodyMap();
+            });
         });
 
         // Active workout banner

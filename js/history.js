@@ -3,9 +3,26 @@
    ============================================ */
 
 const History = {
+    pendingDeleteId: null,
+    pendingClearMode: null,
+
     init() {
         document.getElementById('history-filter-workout').addEventListener('change', () => {
             this.render();
+        });
+
+        document.getElementById('btn-clear-history').addEventListener('click', () => {
+            this.requestClearAll();
+        });
+
+        document.getElementById('btn-cancel-history-confirm').addEventListener('click', () => {
+            this.hideConfirmModal();
+        });
+        document.getElementById('btn-confirm-history-delete').addEventListener('click', () => {
+            this.confirmDelete();
+        });
+        document.getElementById('history-confirm-modal').addEventListener('click', (e) => {
+            if (e.target.id === 'history-confirm-modal') this.hideConfirmModal();
         });
     },
 
@@ -41,10 +58,12 @@ const History = {
         if (history.length === 0) {
             container.innerHTML = '';
             emptyState.classList.remove('hidden');
+            this.updateClearButton(0);
             return;
         }
 
         emptyState.classList.add('hidden');
+        this.updateClearButton(history.length);
 
         const muscleNames = {
             chest: 'Peito',
@@ -69,6 +88,12 @@ const History = {
                     <div class="history-item-header">
                         <span class="history-item-workout">${entry.workoutName}</span>
                         <span class="history-item-date">${dateStr}</span>
+                        <button class="btn-icon-sm btn-danger-sm history-delete-btn" onclick="History.requestDelete('${entry.id}')" title="Excluir registro">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="3 6 5 6 21 6"></polyline>
+                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                            </svg>
+                        </button>
                     </div>
                     ${muscles.length > 0 ? `
                         <div class="history-item-muscles">
@@ -99,6 +124,81 @@ const History = {
                 </div>
             `;
         }).join('');
+    },
+
+    getFilteredHistory() {
+        const filter = document.getElementById('history-filter-workout').value;
+        const allHistory = Storage.getHistory();
+        if (filter === 'all') return allHistory;
+        return allHistory.filter(entry => entry.workoutId === filter);
+    },
+
+    updateClearButton(count) {
+        const btn = document.getElementById('btn-clear-history');
+        if (!btn) return;
+        btn.classList.toggle('hidden', count <= 0);
+    },
+
+    requestDelete(id) {
+        this.pendingDeleteId = id;
+        this.pendingClearMode = null;
+        document.getElementById('history-confirm-title').textContent = 'Excluir registro?';
+        document.getElementById('history-confirm-message').textContent = 'Esta acao nao pode ser desfeita.';
+        document.getElementById('history-confirm-modal').classList.add('active');
+    },
+
+    requestClearAll() {
+        const filtered = this.getFilteredHistory();
+        if (filtered.length === 0) return;
+
+        const filter = document.getElementById('history-filter-workout').value;
+        this.pendingDeleteId = null;
+        this.pendingClearMode = filter === 'all' ? 'all' : 'filtered';
+
+        document.getElementById('history-confirm-title').textContent = 'Limpar historico?';
+        document.getElementById('history-confirm-message').textContent = filter === 'all'
+            ? `Excluir todo o historico (${filtered.length} registro${filtered.length > 1 ? 's' : ''})? Esta acao nao pode ser desfeita.`
+            : `Excluir os ${filtered.length} registro${filtered.length > 1 ? 's' : ''} deste filtro? Esta acao nao pode ser desfeita.`;
+        document.getElementById('history-confirm-modal').classList.add('active');
+    },
+
+    hideConfirmModal() {
+        document.getElementById('history-confirm-modal').classList.remove('active');
+        this.pendingDeleteId = null;
+        this.pendingClearMode = null;
+    },
+
+    confirmDelete() {
+        if (this.pendingDeleteId) {
+            Storage.deleteHistoryEntry(this.pendingDeleteId);
+            this.hideConfirmModal();
+            this.render();
+            App.showToast('Registro excluido');
+            App.updateBodyMap();
+            return;
+        }
+
+        if (this.pendingClearMode === 'all') {
+            Storage.clearHistory();
+            this.hideConfirmModal();
+            this.render();
+            App.showToast('Historico limpo');
+            App.updateBodyMap();
+            return;
+        }
+
+        if (this.pendingClearMode === 'filtered') {
+            const toRemove = new Set(this.getFilteredHistory().map(e => e.id));
+            const remaining = Storage.getHistory().filter(entry => !toRemove.has(entry.id));
+            Storage.set(Storage.KEYS.HISTORY, remaining);
+            this.hideConfirmModal();
+            this.render();
+            App.showToast('Historico filtrado limpo');
+            App.updateBodyMap();
+            return;
+        }
+
+        this.hideConfirmModal();
     },
 
     computePRKeys(history) {

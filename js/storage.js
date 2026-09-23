@@ -11,7 +11,8 @@ const Storage = {
         CURRENT_WORKOUT: 'gymtracker_current_workout',
         TIMER: 'gymtracker_timer',
         REST_TIMER: 'gymtracker_rest_timer',
-        THEME: 'gymtracker_theme'
+        THEME: 'gymtracker_theme',
+        BODY_SEX: 'gymtracker_body_sex'
     },
 
     get(key) {
@@ -280,6 +281,11 @@ const Storage = {
         return entry;
     },
 
+    deleteHistoryEntry(id) {
+        const history = this.getHistory().filter(entry => entry.id !== id);
+        this.set(this.KEYS.HISTORY, history);
+    },
+
     clearHistory() {
         this.set(this.KEYS.HISTORY, []);
     },
@@ -378,5 +384,14 @@ const Storage = {
 
     setTheme(theme) {
         this.set(this.KEYS.THEME, theme);
+    },
+
+    getBodySex() {
+        const value = this.get(this.KEYS.BODY_SEX);
+        return value === 'female' ? 'female' : 'male';
+    },
+
+    setBodySex(sex) {
+        this.set(this.KEYS.BODY_SEX, sex === 'female' ? 'female' : 'male');
     }
 };

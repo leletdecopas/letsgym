@@ -27,7 +27,7 @@
             } catch (e) {}
         })();
     </script>
-    <link rel="stylesheet" href="css/style.css?v=6">
+    <link rel="stylesheet" href="css/style.css?v=7">
 </head>
 <body>
     <div id="app">
@@ -115,6 +115,12 @@
                 <section class="body-map-section">
                     <div class="section-header">
                         <span class="section-title">Musculos Treinados na Semana</span>
+                        <div class="section-actions">
+                            <div class="body-sex-toggle" role="group" aria-label="Corpo masculino ou feminino">
+                                <button type="button" class="body-sex-btn active" data-sex="male" title="Corpo masculino">M</button>
+                                <button type="button" class="body-sex-btn" data-sex="female" title="Corpo feminino">F</button>
+                            </div>
+                        </div>
                     </div>
                     <div class="body-map-card">
                         <div id="body-map-container"></div>
@@ -268,6 +274,13 @@
                     <select id="history-filter-workout">
                         <option value="all">Todos os treinos</option>
                     </select>
+                    <button id="btn-clear-history" class="btn-clear-history hidden" title="Limpar historico filtrado">
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="3 6 5 6 21 6"></polyline>
+                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                        </svg>
+                        Limpar
+                    </button>
                 </div>
                 <div id="history-list" class="history-list"></div>
                 <div id="history-empty" class="empty-state hidden">
@@ -386,6 +399,22 @@
             </div>
         </div>
 
+        <!-- MODAL: Confirmar exclusao no historico -->
+        <div id="history-confirm-modal" class="modal modal-small">
+            <div class="modal-content" style="text-align: center;">
+                <div class="modal-header" style="justify-content: center;">
+                    <h3 id="history-confirm-title">Excluir registro?</h3>
+                </div>
+                <div class="modal-body">
+                    <p id="history-confirm-message" style="color: var(--text-secondary);">Esta acao nao pode ser desfeita.</p>
+                </div>
+                <div class="modal-footer">
+                    <button id="btn-cancel-history-confirm" class="btn-secondary">Cancelar</button>
+                    <button id="btn-confirm-history-delete" class="btn-delete-workout">Excluir</button>
+                </div>
+            </div>
+        </div>
+
         <!-- TELA: Treino Finalizado -->
         <div id="workout-complete-screen" class="screen no-tab-bar">
             <div class="complete-content">
@@ -452,11 +481,12 @@
         </div>
     </div>
 
-    <script src="js/storage.js?v=6"></script>
-    <script src="js/bodyMap.js?v=6"></script>
-    <script src="js/timer.js?v=6"></script>
-    <script src="js/workout.js?v=6"></script>
-    <script src="js/history.js?v=6"></script>
-    <script src="js/app.js?v=6"></script>
+    <script src="js/storage.js?v=7"></script>
+    <script src="js/bodyPaths.js?v=7"></script>
+    <script src="js/bodyMap.js?v=7"></script>
+    <script src="js/timer.js?v=7"></script>
+    <script src="js/workout.js?v=7"></script>
+    <script src="js/history.js?v=7"></script>
+    <script src="js/app.js?v=7"></script>
 </body>
 </html>

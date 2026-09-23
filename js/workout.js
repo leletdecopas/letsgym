@@ -88,9 +88,13 @@ const Workout = {
 
         // Recalcular descanso ao voltar ao app (timer nao congela em segundo plano)
         document.addEventListener('visibilitychange', () => {
-            if (!document.hidden && this.restTimer) this.syncRestTimer();
+            if (!document.hidden) {
+                AudioAlert.unlock();
+                if (this.restTimer) this.syncRestTimer();
+            }
         });
         window.addEventListener('focus', () => {
+            AudioAlert.unlock();
             if (this.restTimer) this.syncRestTimer();
         });
     },
@@ -383,6 +387,9 @@ const Workout = {
 
         this.playAlert();
         App.showToast('Descanso finalizado! Proxima serie.');
+        if (AudioAlert.pending) {
+            setTimeout(() => AudioAlert.flushPending(), 0);
+        }
 
         setTimeout(() => {
             const container = document.getElementById(`timer-inline-${timer.exerciseId}`);

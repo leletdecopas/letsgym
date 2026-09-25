@@ -10,6 +10,7 @@ const App = {
         Timer.init();
         Workout.init();
         History.init();
+        Stats.init();
         BodyMap.mount('body-map-container');
 
         // Restaurar descanso persistido (continua mesmo apos reload)
@@ -219,6 +220,8 @@ const App = {
             this.showScreen('timer');
         } else if (tab === 'history') {
             History.show();
+        } else if (tab === 'stats') {
+            this.showScreen('stats');
         } else {
             this.showScreen('main');
         }
@@ -246,7 +249,7 @@ const App = {
         }
 
         // Update nav active state
-        if (screenName === 'main' || screenName === 'history') {
+        if (screenName === 'main' || screenName === 'history' || screenName === 'stats') {
             document.querySelectorAll('.nav-item').forEach(item => {
                 const tab = item.getAttribute('data-tab');
                 item.classList.toggle('active', tab === screenName);
@@ -258,11 +261,17 @@ const App = {
             this.renderWorkouts();
             this.renderActiveWorkoutBanner();
             this.updateBodyMap();
+            Stats.renderStreaks();
         }
 
         // Refresh history
         if (screenName === 'history') {
             History.render();
+        }
+
+        // Refresh statistics
+        if (screenName === 'stats') {
+            Stats.renderStats();
         }
     },
 

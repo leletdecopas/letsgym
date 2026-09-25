@@ -12,7 +12,8 @@ const Storage = {
         TIMER: 'gymtracker_timer',
         REST_TIMER: 'gymtracker_rest_timer',
         THEME: 'gymtracker_theme',
-        BODY_SEX: 'gymtracker_body_sex'
+        BODY_SEX: 'gymtracker_body_sex',
+        WEEK_GOAL: 'gymtracker_week_goal'
     },
 
     get(key) {
@@ -393,5 +394,18 @@ const Storage = {
 
     setBodySex(sex) {
         this.set(this.KEYS.BODY_SEX, sex === 'female' ? 'female' : 'male');
+    },
+
+    getWeekGoal() {
+        const value = parseInt(this.get(this.KEYS.WEEK_GOAL), 10);
+        if (Number.isFinite(value) && value >= 0 && value <= 7) return value;
+        return 4;
+    },
+
+    setWeekGoal(days) {
+        const value = parseInt(days, 10);
+        if (!Number.isFinite(value) || value < 1 || value > 7) return false;
+        this.set(this.KEYS.WEEK_GOAL, value);
+        return true;
     }
 };

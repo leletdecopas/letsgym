@@ -871,6 +871,8 @@ const Workout = {
 
         BodyMap.mount('complete-body-map-container', muscles);
 
+        if (typeof Stats !== 'undefined') Stats.renderCompleteWeek();
+
         App.showScreen('workout-complete');
     },
 
@@ -946,10 +948,13 @@ const Workout = {
 
     getActiveMusclesForWeek() {
         const history = Storage.getHistory();
-        const weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+        const week = (typeof Stats !== 'undefined')
+            ? Stats.getWeekRange()
+            : { start: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), end: new Date(Date.now() + 1000) };
 
         const weekEntries = history.filter(entry => {
-            return new Date(entry.date).getTime() >= weekAgo;
+            const t = new Date(entry.date).getTime();
+            return Number.isFinite(t) && t >= week.start.getTime() && t < week.end.getTime();
         });
 
         const muscles = new Set();

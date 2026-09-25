@@ -27,7 +27,7 @@
             } catch (e) {}
         })();
     </script>
-    <link rel="stylesheet" href="css/style.css?v=8">
+    <link rel="stylesheet" href="css/style.css?v=10">
 </head>
 <body>
     <div id="app">
@@ -111,6 +111,8 @@
                         </svg>
                     </span>
                 </div>
+
+                <div class="streak-card" id="streak-card" data-streak-card></div>
 
                 <section class="body-map-section">
                     <div class="section-header">
@@ -300,6 +302,57 @@
             </div>
         </div>
 
+        <!-- TELA: ESTATISTICAS -->
+        <div id="stats-screen" class="screen">
+            <header class="app-header">
+                <div class="app-logo">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 3v18h18"></path>
+                        <path d="M18 17V9"></path>
+                        <path d="M13 17V5"></path>
+                        <path d="M8 17v-3"></path>
+                    </svg>
+                    <span class="app-logo-text">Estatisticas</span>
+                </div>
+            </header>
+
+            <div class="main-content">
+                <div id="stats-kpis" class="exercise-stats"></div>
+                <p class="stats-note">Calorias sao apenas uma estimativa calculada pelo volume treinado (peso x repeticoes), nao um valor medido.</p>
+
+                <section class="stats-section">
+                    <div class="section-header">
+                        <span class="section-title">Ofensiva da semana</span>
+                    </div>
+                    <div class="streak-card" data-streak-card></div>
+                </section>
+
+                <section class="stats-section">
+                    <div class="section-header">
+                        <span class="section-title">Treinos por semana</span>
+                        <span class="section-hint">ultimas 12 semanas</span>
+                    </div>
+                    <div class="stats-card" id="stats-weekly-chart"></div>
+                </section>
+
+                <section class="stats-section">
+                    <div class="section-header">
+                        <span class="section-title">Progressao de carga</span>
+                    </div>
+                    <select id="stats-exercise-select" class="stats-select"></select>
+                    <div class="stats-card" id="stats-progress-chart"></div>
+                </section>
+
+                <section class="stats-section">
+                    <div class="section-header">
+                        <span class="section-title">Musculos mais treinados</span>
+                        <span class="section-hint">ultimos 30 dias</span>
+                    </div>
+                    <div class="stats-card" id="stats-muscle-bars"></div>
+                </section>
+            </div>
+        </div>
+
         <!-- BOTTOM NAVIGATION -->
         <nav class="bottom-nav" id="bottom-nav">
             <button class="nav-item active" data-tab="main">
@@ -315,6 +368,14 @@
                     <polyline points="12 6 12 12 16 14"></polyline>
                 </svg>
                 <span>Timer</span>
+            </button>
+            <button class="nav-item" data-tab="stats">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="6" y1="20" x2="6" y2="14"></line>
+                    <line x1="12" y1="20" x2="12" y2="4"></line>
+                    <line x1="18" y1="20" x2="18" y2="10"></line>
+                </svg>
+                <span>Estatisticas</span>
             </button>
             <button class="nav-item" data-tab="history">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -443,6 +504,12 @@
                     <div id="complete-prs-list" class="complete-prs-list"></div>
                 </div>
 
+                <div class="complete-week">
+                    <span class="complete-muscles-label">Sua semana (dom a sab):</span>
+                    <div id="complete-week-days" class="complete-week-days"></div>
+                    <span id="complete-week-count" class="complete-week-count"></span>
+                </div>
+
                 <button id="btn-back-complete" class="btn-back-complete">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <polyline points="15 18 9 12 15 6"></polyline>
@@ -481,14 +548,46 @@
                 </div>
             </div>
         </div>
+
+        <!-- MODAL: Meta de dias na semana -->
+        <div id="goal-modal" class="modal modal-small">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Meta da semana</h3>
+                    <button id="btn-goal-close" class="btn-close" type="button">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p class="goal-modal-text">Quantos dias por semana voce quer treinar?</p>
+                    <div class="goal-stepper">
+                        <button id="btn-goal-minus" class="goal-step-btn" type="button" aria-label="Diminuir">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                        </button>
+                        <div class="goal-value"><span id="goal-modal-value">4</span><span class="goal-value-suffix">dias</span></div>
+                        <button id="btn-goal-plus" class="goal-step-btn" type="button" aria-label="Aumentar">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                        </button>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button id="btn-goal-cancel" class="btn-secondary">Cancelar</button>
+                    <button id="btn-goal-save" class="btn-primary">Salvar</button>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <script src="js/storage.js?v=8"></script>
-    <script src="js/bodyPaths.js?v=8"></script>
-    <script src="js/bodyMap.js?v=8"></script>
-    <script src="js/timer.js?v=8"></script>
-    <script src="js/workout.js?v=8"></script>
-    <script src="js/history.js?v=8"></script>
-    <script src="js/app.js?v=8"></script>
+    <script src="js/storage.js?v=10"></script>
+    <script src="js/bodyPaths.js?v=10"></script>
+    <script src="js/bodyMap.js?v=10"></script>
+    <script src="js/timer.js?v=10"></script>
+    <script src="js/workout.js?v=10"></script>
+    <script src="js/history.js?v=10"></script>
+    <script src="js/stats.js?v=10"></script>
+    <script src="js/app.js?v=10"></script>
 </body>
 </html>

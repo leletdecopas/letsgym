@@ -35,10 +35,11 @@
     --map-highlight: #1177DE;
     --map-glow: rgba(17, 119, 222, 0.45);
     --map-accent-soft: rgba(17, 119, 222, 0.35);
-    --bm-base: #12121A;
-    --bm-muscle: #16161F;
-    --bm-stroke: #2A2A35;
-    --bm-line: #55556A;
+    --bm-card: #1E1E2B;
+    --bm-base: #2C2C3E;
+    --bm-muscle: #38384C;
+    --bm-stroke: #6C6C88;
+    --bm-line: #8A8AA6;
     --radius-sm: 8px;
     --radius: 12px;
     --radius-lg: 16px;
@@ -70,6 +71,7 @@ html[data-theme="light"] {
     --trophy-soft: rgba(180, 83, 9, 0.08);
     --trophy-border: rgba(180, 83, 9, 0.35);
     --trophy-glow: rgba(180, 83, 9, 0.3);
+    --bm-card: #FFFFFF;
     --bm-base: #E9ECF2;
     --bm-muscle: #FFFFFF;
     --bm-stroke: #C9CEDA;
@@ -370,7 +372,7 @@ body {
 }
 
 .body-map-card {
-    background: var(--bg-card);
+    background: var(--bm-card);
     border: 1px solid var(--border);
     border-radius: var(--radius-lg);
     padding: 1.5rem;
@@ -468,7 +470,7 @@ body {
 
 .body-map-label {
     font-size: 42px;
-    fill: var(--text-muted);
+    fill: var(--text-secondary);
     text-anchor: middle;
     font-family: var(--font);
     font-weight: 600;
@@ -1771,7 +1773,7 @@ body {
 .complete-body-map {
     position: relative;
     z-index: 1;
-    background: var(--bg-card);
+    background: var(--bm-card);
     border: 1px solid var(--border);
     border-radius: var(--radius-lg);
     padding: 1.5rem;
@@ -2624,4 +2626,453 @@ button:focus-visible,
 .set-row.completed .set-reps,
 .set-row.completed .set-weight {
     text-decoration: line-through;
+}
+
+/* ============================================
+   STREAK CARD - OFENSA DA SEMANA
+   ============================================ */
+.streak-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.streak-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-bottom: 0.85rem;
+}
+
+.streak-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-muted);
+}
+
+.streak-goal {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.3rem 0.6rem;
+    background: var(--accent-soft);
+    border: 1px solid rgba(255, 107, 53, 0.3);
+    border-radius: var(--radius-sm);
+    color: var(--accent);
+    font-family: var(--font);
+    font-size: 0.7rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.streak-goal svg {
+    width: 13px;
+    height: 13px;
+}
+
+.streak-goal:hover {
+    background: rgba(255, 107, 53, 0.2);
+}
+
+.streak-body {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 0.9rem;
+}
+
+.streak-count {
+    display: flex;
+    align-items: baseline;
+    line-height: 1;
+}
+
+.streak-count-value {
+    font-size: 2.4rem;
+    font-weight: 900;
+    color: var(--text-primary);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.03em;
+}
+
+.streak-count-total {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-muted);
+}
+
+.streak-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    min-width: 0;
+}
+
+.streak-status {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+.streak-range {
+    font-size: 0.68rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-muted);
+}
+
+.streak-days {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 0.35rem;
+    margin-bottom: 0.75rem;
+}
+
+.streak-day {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 30px;
+    background: var(--bg-base);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    transition: var(--transition);
+}
+
+.streak-day.trained {
+    background: var(--accent-soft);
+    border-color: rgba(255, 107, 53, 0.5);
+    color: var(--accent);
+}
+
+.streak-day.today {
+    border-color: var(--text-muted);
+    color: var(--text-secondary);
+}
+
+.streak-day.today.trained {
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+.streak-progress {
+    position: relative;
+    height: 6px;
+    background: var(--bg-base);
+    border-radius: 3px;
+}
+
+.streak-progress-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 3px;
+    transition: width 0.3s ease;
+}
+
+.streak-progress-goal {
+    position: absolute;
+    top: -3px;
+    width: 2px;
+    height: 12px;
+    background: var(--text-muted);
+    border-radius: 1px;
+}
+
+/* ============================================
+   STREAK NA TELA DE TREINO CONCLUIDO
+   ============================================ */
+.complete-week {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+.complete-week-days {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 0.35rem;
+    margin-bottom: 0.55rem;
+}
+
+.complete-week-day {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 34px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--text-muted);
+}
+
+.complete-week-day.trained {
+    background: var(--success-soft);
+    border-color: var(--success);
+    color: var(--success);
+}
+
+.complete-week-day.today {
+    border-color: var(--text-muted);
+}
+
+.complete-week-day.today.trained {
+    border-color: var(--success);
+}
+
+.complete-week-count {
+    display: block;
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-muted);
+}
+
+/* ============================================
+   TELA DE ESTATISTICAS
+   ============================================ */
+.stats-note {
+    font-size: 0.72rem;
+    line-height: 1.5;
+    color: var(--text-muted);
+    background: var(--bg-base);
+    border: 1px dashed var(--border-light);
+    border-radius: var(--radius);
+    padding: 0.6rem 0.75rem;
+    margin-bottom: 1.25rem;
+}
+
+.stats-section {
+    margin-bottom: 1.75rem;
+}
+
+.section-hint {
+    font-size: 0.65rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-muted);
+}
+
+.stats-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 0.9rem;
+}
+
+.stats-select {
+    width: 100%;
+    margin-bottom: 0.6rem;
+    padding: 0.75rem 1rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--text-primary);
+    font-family: var(--font);
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.stats-select:focus {
+    outline: none;
+    border-color: var(--accent);
+}
+
+.exercise-stat-value.stat-text {
+    font-size: 0.95rem;
+}
+
+.chart {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
+.chart .bar {
+    fill: rgba(255, 107, 53, 0.4);
+}
+
+.chart .bar-current {
+    fill: var(--accent);
+}
+
+.chart .chart-grid {
+    stroke: var(--border);
+    stroke-width: 1;
+}
+
+.chart .chart-label {
+    fill: var(--text-muted);
+    font-family: var(--font);
+    font-size: 8px;
+    font-weight: 600;
+}
+
+.chart .chart-value {
+    fill: var(--text-secondary);
+    font-family: var(--font);
+    font-size: 9px;
+    font-weight: 700;
+    text-anchor: middle;
+}
+
+.chart .chart-line {
+    fill: none;
+    stroke: var(--accent);
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.chart .chart-dot {
+    fill: var(--accent);
+    stroke: var(--bg-card);
+    stroke-width: 1.5;
+}
+
+.chart .chart-delta {
+    fill: var(--success);
+    font-family: var(--font);
+    font-size: 9px;
+    font-weight: 700;
+}
+
+.chart-empty {
+    text-align: center;
+    padding: 1.25rem 0.5rem;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+.muscle-bar-row {
+    display: grid;
+    grid-template-columns: 78px 1fr 28px;
+    align-items: center;
+    gap: 0.6rem;
+    margin-bottom: 0.6rem;
+}
+
+.muscle-bar-row:last-child {
+    margin-bottom: 0;
+}
+
+.muscle-bar-label {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.muscle-bar-track {
+    height: 8px;
+    background: var(--bg-base);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.muscle-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), #FF9A6B);
+    border-radius: 4px;
+    transition: width 0.3s ease;
+}
+
+.muscle-bar-count {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+
+/* ============================================
+   MODAL DE META SEMANAL
+   ============================================ */
+.goal-modal-text {
+    text-align: center;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    margin-bottom: 1.1rem;
+}
+
+.goal-stepper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1.25rem;
+    margin-bottom: 0.5rem;
+}
+
+.goal-step-btn {
+    width: 46px;
+    height: 46px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.goal-step-btn svg {
+    width: 20px;
+    height: 20px;
+}
+
+.goal-step-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+.goal-value {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 84px;
+    line-height: 1;
+}
+
+.goal-value #goal-modal-value {
+    font-size: 2.4rem;
+    font-weight: 900;
+    color: var(--accent);
+    font-variant-numeric: tabular-nums;
+}
+
+.goal-value-suffix {
+    margin-top: 0.3rem;
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-muted);
+}
+
+.nav-item {
+    padding: 0.5rem 0.4rem;
+    min-width: 0;
+}
+
+.nav-item span {
+    letter-spacing: 0.02em;
 }

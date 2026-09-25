@@ -1,4 +1,4 @@
-const CACHE_NAME = 'letsgym-v9';
+const CACHE_NAME = 'letsgym-v10';
 const urlsToCache = [
     './',
     './index.html',
@@ -9,6 +9,7 @@ const urlsToCache = [
     './js/timer.js',
     './js/workout.js',
     './js/history.js',
+    './js/stats.js',
     './js/app.js',
     './manifest.json',
     './icons/apple-touch-icon.png',

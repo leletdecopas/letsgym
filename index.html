@@ -27,7 +27,7 @@
             } catch (e) {}
         })();
     </script>
-    <link rel="stylesheet" href="css/style.css?v=7">
+    <link rel="stylesheet" href="css/style.css?v=8">
 </head>
 <body>
     <div id="app">
@@ -162,22 +162,21 @@
         <!-- TELA DO TREINO -->
         <div id="workout-screen" class="screen no-tab-bar">
             <header class="app-header">
-                <button id="btn-back-main" class="btn-back">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <polyline points="15 18 9 12 15 6"></polyline>
-                    </svg>
-                    Voltar
-                </button>
-                <h1 id="workout-title" class="app-logo-text"></h1>
-                <button id="btn-finish-workout" class="btn-finish">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                        <polyline points="20 6 9 17 4 12"></polyline>
-                    </svg>
-                    Finalizar
-                </button>
-            </header>
-
-            <div class="main-content">
+                <div class="header-main">
+                    <button id="btn-back-main" class="btn-back">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="15 18 9 12 15 6"></polyline>
+                        </svg>
+                        Voltar
+                    </button>
+                    <h1 id="workout-title" class="app-logo-text"></h1>
+                    <button id="btn-finish-workout" class="btn-finish">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                        Finalizar
+                    </button>
+                </div>
                 <div class="workout-progress">
                     <div class="workout-progress-info">
                         <span class="workout-progress-label">Progresso do treino</span>
@@ -187,6 +186,9 @@
                         <div class="progress-fill" id="workout-progress-fill" style="width: 0%"></div>
                     </div>
                 </div>
+            </header>
+
+            <div class="main-content">
                 <div id="exercises-list" class="exercises-list"></div>
                 <button id="btn-add-exercise" class="btn-add-exercise">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -481,12 +483,12 @@
         </div>
     </div>
 
-    <script src="js/storage.js?v=7"></script>
-    <script src="js/bodyPaths.js?v=7"></script>
-    <script src="js/bodyMap.js?v=7"></script>
-    <script src="js/timer.js?v=7"></script>
-    <script src="js/workout.js?v=7"></script>
-    <script src="js/history.js?v=7"></script>
-    <script src="js/app.js?v=7"></script>
+    <script src="js/storage.js?v=8"></script>
+    <script src="js/bodyPaths.js?v=8"></script>
+    <script src="js/bodyMap.js?v=8"></script>
+    <script src="js/timer.js?v=8"></script>
+    <script src="js/workout.js?v=8"></script>
+    <script src="js/history.js?v=8"></script>
+    <script src="js/app.js?v=8"></script>
 </body>
 </html>

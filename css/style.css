@@ -128,6 +128,18 @@ body {
     border-bottom: 1px solid var(--border);
 }
 
+.header-main {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+#workout-screen .app-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.55rem;
+}
+
 .app-logo {
     display: flex;
     align-items: center;
@@ -1963,21 +1975,60 @@ body {
 }
 
 .set-row {
+    position: relative;
+    overflow: hidden;
+    border-radius: var(--radius-sm);
+    touch-action: pan-y;
+}
+
+.set-row-content {
+    position: relative;
+    z-index: 1;
     display: grid;
     grid-template-columns: 32px 1fr 1fr 40px 40px;
     gap: 0.5rem;
     align-items: center;
     padding: 0.65rem 0;
     border-radius: var(--radius-sm);
-    transition: all 0.2s ease;
     background: var(--bg-base);
+    transition: transform var(--transition), background var(--transition);
+    will-change: transform;
 }
 
-.set-row:hover {
+.set-row.swiping .set-row-content {
+    transition: none;
+}
+
+.set-row:hover .set-row-content {
     background: var(--bg-elevated);
 }
 
-.set-row.completed {
+.set-row-delete {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 72px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--danger-soft);
+    border: none;
+    color: var(--danger);
+    cursor: pointer;
+    transition: background var(--transition);
+}
+
+.set-row-delete svg {
+    width: 18px;
+    height: 18px;
+}
+
+.set-row-delete:hover {
+    background: rgba(239, 68, 68, 0.25);
+}
+
+.set-row.completed .set-row-content {
     background: rgba(74, 222, 128, 0.06);
     opacity: 0.7;
 }
@@ -2468,8 +2519,8 @@ html:not([data-theme="light"]) .theme-icon-moon {
    WORKOUT GLOBAL PROGRESS
    ============================================ */
 .workout-progress {
-    padding-top: 1rem;
-    margin-bottom: 0.75rem;
+    padding-top: 0;
+    margin-bottom: 0;
 }
 
 .workout-progress-info {

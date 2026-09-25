@@ -8,6 +8,14 @@ const Workout = {
     editingWorkoutId: null,
     restTimer: null,
     restInterval: null,
+    swipeRow: null,
+    swipeStartX: 0,
+    swipeStartY: 0,
+    swipeDX: 0,
+    swipeActive: false,
+    suppressClick: false,
+    suppressRow: null,
+    openSetRow: null,
 
     muscleNames: {
         chest: 'Peito',
@@ -41,6 +49,8 @@ const Workout = {
         document.getElementById('btn-add-exercise').addEventListener('click', () => {
             this.showExerciseModal();
         });
+
+        this.initSetSwipe();
 
         document.getElementById('btn-close-modal').addEventListener('click', () => {
             this.hideExerciseModal();
@@ -126,6 +136,7 @@ const Workout = {
         const container = document.getElementById('exercises-list');
         const exercises = Storage.getExercises(this.currentWorkoutId);
 
+        this.openSetRow = null;
         this.updateWorkoutProgress();
 
         if (exercises.length === 0) {
@@ -158,21 +169,29 @@ const Workout = {
         const setsRows = exercise.sets.map((set, index) => {
             const typeInfo = this.setTypes[set.type] || this.setTypes.normal;
             return `
-                <div class="set-row ${set.completed ? 'completed' : ''}" data-set-id="${set.id}">
-                    <span class="set-number">${index + 1}</span>
-                    <div class="set-reps" onclick="Workout.editSetField('${exercise.id}', '${set.id}', 'targetReps', this)">
-                        ${set.targetReps}
+                <div class="set-row ${set.completed ? 'completed' : ''}" data-set-id="${set.id}" data-exercise-id="${exercise.id}">
+                    <div class="set-row-content">
+                        <span class="set-number">${index + 1}</span>
+                        <div class="set-reps" onclick="Workout.editSetField('${exercise.id}', '${set.id}', 'targetReps', this)">
+                            ${set.targetReps}
+                        </div>
+                        <div class="set-weight" onclick="Workout.editSetField('${exercise.id}', '${set.id}', 'weight', this)">
+                            ${set.weight}<span class="unit">kg</span>
+                        </div>
+                        <div class="set-type" onclick="Workout.cycleSetType('${exercise.id}', '${set.id}')" style="color: ${typeInfo.color}" title="${typeInfo.label}">
+                            ${typeInfo.short}
+                        </div>
+                        <label class="set-checkbox" onclick="event.stopPropagation()">
+                            <input type="checkbox" ${set.completed ? 'checked' : ''} onchange="Workout.toggleSet('${exercise.id}', '${set.id}', this.checked)">
+                            <span class="checkmark"></span>
+                        </label>
                     </div>
-                    <div class="set-weight" onclick="Workout.editSetField('${exercise.id}', '${set.id}', 'weight', this)">
-                        ${set.weight}<span class="unit">kg</span>
-                    </div>
-                    <div class="set-type" onclick="Workout.cycleSetType('${exercise.id}', '${set.id}')" style="color: ${typeInfo.color}" title="${typeInfo.label}">
-                        ${typeInfo.short}
-                    </div>
-                    <label class="set-checkbox" onclick="event.stopPropagation()">
-                        <input type="checkbox" ${set.completed ? 'checked' : ''} onchange="Workout.toggleSet('${exercise.id}', '${set.id}', this.checked)">
-                        <span class="checkmark"></span>
-                    </label>
+                    <button class="set-row-delete" onclick="Workout.removeSet('${exercise.id}', '${set.id}')" aria-label="Excluir serie" title="Excluir serie">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="3 6 5 6 21 6"></polyline>
+                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                        </svg>
+                    </button>
                 </div>
             `;
         }).join('');
@@ -489,6 +508,104 @@ const Workout = {
         AudioAlert.play();
     },
 
+    initSetSwipe() {
+        const list = document.getElementById('exercises-list');
+        const DELETE_WIDTH = 72;
+        const THRESHOLD = 36;
+
+        const setContentX = (row, x) => {
+            const content = row.querySelector('.set-row-content');
+            if (content) content.style.transform = x ? `translateX(${x}px)` : '';
+        };
+
+        const closeRow = () => {
+            if (this.openSetRow) {
+                setContentX(this.openSetRow, 0);
+                this.openSetRow = null;
+            }
+        };
+
+        // Tap fora das linhas fecha a serie aberta
+        document.addEventListener('pointerdown', (e) => {
+            if (this.openSetRow && !e.target.closest('.set-row')) closeRow();
+        });
+
+        const finishPointer = () => {
+            const row = this.swipeRow;
+            if (!row) return;
+            row.classList.remove('swiping');
+            this.swipeRow = null;
+
+            if (this.swipeActive) {
+                this.swipeActive = false;
+                const shouldOpen = this.swipeDX <= -THRESHOLD;
+                if (this.openSetRow && this.openSetRow !== row) setContentX(this.openSetRow, 0);
+                setContentX(row, shouldOpen ? -DELETE_WIDTH : 0);
+                this.openSetRow = shouldOpen ? row : null;
+
+                // Arrasto nao pode disparar a edicao inline de reps/peso/tipo
+                this.suppressClick = true;
+                this.suppressRow = row;
+                setTimeout(() => { this.suppressClick = false; this.suppressRow = null; }, 350);
+                return;
+            }
+
+            // Tap sem arrasto: se a linha estava aberta, fecha
+            if (this.openSetRow === row) closeRow();
+        };
+
+        list.addEventListener('pointerdown', (e) => {
+            const row = e.target.closest('.set-row');
+            if (!row) { closeRow(); return; }
+            if (e.target.closest('.set-row-delete')) return;
+            if (this.openSetRow && this.openSetRow !== row) closeRow();
+
+            this.swipeRow = row;
+            this.swipeStartX = e.clientX;
+            this.swipeStartY = e.clientY;
+            this.swipeDX = 0;
+            this.swipeActive = false;
+        });
+
+        list.addEventListener('pointermove', (e) => {
+            const row = this.swipeRow;
+            if (!row) return;
+
+            const dx = e.clientX - this.swipeStartX;
+            const dy = e.clientY - this.swipeStartY;
+
+            if (!this.swipeActive) {
+                if (Math.abs(dy) > 8 && Math.abs(dy) > Math.abs(dx)) {
+                    // Scroll vertical ganhou: aborta o arrasto
+                    this.swipeRow = null;
+                    return;
+                }
+                if (Math.abs(dx) <= 8 || Math.abs(dx) <= Math.abs(dy)) return;
+                this.swipeActive = true;
+                row.classList.add('swiping');
+                try { row.setPointerCapture(e.pointerId); } catch (_) { /* noop */ }
+            }
+
+            const base = this.openSetRow === row ? -DELETE_WIDTH : 0;
+            this.swipeDX = Math.max(-DELETE_WIDTH, Math.min(0, base + dx));
+            setContentX(row, this.swipeDX);
+        });
+
+        list.addEventListener('pointerup', finishPointer);
+        list.addEventListener('pointercancel', finishPointer);
+
+        list.addEventListener('click', (e) => {
+            const swipedRow = e.target.closest('.set-row');
+            if (this.suppressClick && swipedRow && swipedRow === this.suppressRow
+                && !e.target.closest('.set-row-delete')) {
+                e.stopPropagation();
+                e.preventDefault();
+                this.suppressClick = false;
+                this.suppressRow = null;
+            }
+        }, true);
+    },
+
     addSet(exerciseId) {
         Storage.addSet(this.currentWorkoutId, exerciseId);
         this.renderExercises();
@@ -496,8 +613,19 @@ const Workout = {
     },
 
     removeSet(exerciseId, setId) {
+        const exercises = Storage.getExercises(this.currentWorkoutId);
+        const exercise = exercises.find(e => e.id === exerciseId);
+        if (!exercise) return;
+
+        if (exercise.sets.length <= 1) {
+            App.showToast('Mantenha ao menos uma serie');
+            this.renderExercises();
+            return;
+        }
+
         Storage.removeSet(this.currentWorkoutId, exerciseId, setId);
         this.renderExercises();
+        App.showToast('Serie removida');
     },
 
     editSetField(exerciseId, setId, field, element) {

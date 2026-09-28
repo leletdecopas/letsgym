@@ -518,10 +518,15 @@ const Workout = {
             if (content) content.style.transform = x ? `translateX(${x}px)` : '';
         };
 
-        const closeRow = () => {
-            if (this.openSetRow) {
-                setContentX(this.openSetRow, 0);
-                this.openSetRow = null;
+        const setDeleteVisible = (row, visible) => {
+            if (row) row.classList.toggle('delete-visible', visible);
+        };
+
+        const closeRow = (row = this.openSetRow) => {
+            if (row) {
+                setContentX(row, 0);
+                setDeleteVisible(row, false);
+                if (this.openSetRow === row) this.openSetRow = null;
             }
         };
 
@@ -539,8 +544,9 @@ const Workout = {
             if (this.swipeActive) {
                 this.swipeActive = false;
                 const shouldOpen = this.swipeDX <= -THRESHOLD;
-                if (this.openSetRow && this.openSetRow !== row) setContentX(this.openSetRow, 0);
+                if (this.openSetRow && this.openSetRow !== row) closeRow(this.openSetRow);
                 setContentX(row, shouldOpen ? -DELETE_WIDTH : 0);
+                setDeleteVisible(row, shouldOpen);
                 this.openSetRow = shouldOpen ? row : null;
 
                 // Arrasto nao pode disparar a edicao inline de reps/peso/tipo
@@ -589,6 +595,7 @@ const Workout = {
             const base = this.openSetRow === row ? -DELETE_WIDTH : 0;
             this.swipeDX = Math.max(-DELETE_WIDTH, Math.min(0, base + dx));
             setContentX(row, this.swipeDX);
+            setDeleteVisible(row, this.swipeDX < 0);
         });
 
         list.addEventListener('pointerup', finishPointer);

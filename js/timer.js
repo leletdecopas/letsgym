@@ -16,7 +16,7 @@ const AudioAlert = {
                 return null;
             }
         }
-        if (this.ctx.state === 'suspended') {
+        if (this.ctx.state !== 'running') {
             this.ctx.resume().catch(() => {});
         }
         return this.ctx;
@@ -26,7 +26,7 @@ const AudioAlert = {
         const ctx = this.ensure();
         if (!ctx) return null;
         try {
-            if (ctx.state === 'suspended') {
+            if (ctx.state !== 'running') {
                 ctx.resume().catch(() => {});
             }
             if (ctx.state === 'running' && !this._silentPlayed) {
@@ -122,6 +122,7 @@ const AudioAlert = {
 
 const Timer = {
     interval: null,
+    finishTimeout: null,
     timeRemaining: 0,
     totalTime: 0,
     endAt: null,
@@ -182,14 +183,18 @@ const Timer = {
             this.reset();
         });
 
-        // Recalcular ao voltar ao app (evita congelar em segundo plano)
+        // Recalcular ao voltar ao app; re-agendar o disparo exato ao
+        // entrar em segundo plano (one-shot sobrevive ao throttle)
         document.addEventListener('visibilitychange', () => {
-            if (!document.hidden) {
+            if (document.hidden) {
+                this.armFinishTimeout();
+            } else {
                 AudioAlert.unlock();
                 AudioAlert.flushPending();
                 this.sync();
             }
         });
+        window.addEventListener('pagehide', () => this.armFinishTimeout());
         window.addEventListener('focus', () => {
             AudioAlert.unlock();
             AudioAlert.flushPending();
@@ -227,6 +232,26 @@ const Timer = {
         this.updateDisplay();
 
         this.interval = setInterval(() => this.tick(), 1000);
+        this.armFinishTimeout();
+    },
+
+    // One-shot para o instante exato do fim: dispara com precisao em
+    // segundo plano, onde o setInterval pode ser congelado pelo navegador.
+    armFinishTimeout() {
+        this.clearFinishTimeout_();
+        if (!this.isRunning || !this.endAt) return;
+        const delay = Math.max(0, this.endAt - Date.now());
+        this.finishTimeout = setTimeout(() => {
+            this.finishTimeout = null;
+            this.tick();
+        }, delay);
+    },
+
+    clearFinishTimeout_() {
+        if (this.finishTimeout) {
+            clearTimeout(this.finishTimeout);
+            this.finishTimeout = null;
+        }
     },
 
     tick() {
@@ -355,6 +380,7 @@ const Timer = {
                 this.finish();
             } else {
                 this.interval = setInterval(() => this.tick(), 1000);
+                this.armFinishTimeout();
             }
         } else {
             this.timeRemaining = state.remaining || 0;
@@ -365,6 +391,7 @@ const Timer = {
     },
 
     clearInterval_() {
+        this.clearFinishTimeout_();
         if (this.interval) {
             clearInterval(this.interval);
             this.interval = null;

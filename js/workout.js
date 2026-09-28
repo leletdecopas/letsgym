@@ -8,6 +8,7 @@ const Workout = {
     editingWorkoutId: null,
     restTimer: null,
     restInterval: null,
+    restTimeout: null,
     swipeRow: null,
     swipeStartX: 0,
     swipeStartY: 0,
@@ -96,13 +97,17 @@ const Workout = {
             if (e.target.id === 'edit-workout-modal') this.hideEditWorkoutModal();
         });
 
-        // Recalcular descanso ao voltar ao app (timer nao congela em segundo plano)
+        // Recalcular descanso ao voltar ao app e re-agendar o disparo exato
+        // ao entrar em segundo plano (o setInterval congela, o one-shot nao)
         document.addEventListener('visibilitychange', () => {
-            if (!document.hidden) {
+            if (document.hidden) {
+                this.armRestTimeout();
+            } else {
                 AudioAlert.unlock();
                 if (this.restTimer) this.syncRestTimer();
             }
         });
+        window.addEventListener('pagehide', () => this.armRestTimeout());
         window.addEventListener('focus', () => {
             AudioAlert.unlock();
             if (this.restTimer) this.syncRestTimer();
@@ -362,6 +367,7 @@ const Workout = {
         };
         Storage.setRestTimerState(this.restTimer);
         this.ensureRestInterval();
+        this.armRestTimeout();
         this.renderRestTimerUI();
     },
 
@@ -370,7 +376,28 @@ const Workout = {
         this.restInterval = setInterval(() => this.syncRestTimer(), 500);
     },
 
+    // One-shot agendado para o instante exato de fim do descanso.
+    // Ao contrario do setInterval, dispara com precisao mesmo com a pagina
+    // em segundo plano (Android com tela ligada).
+    armRestTimeout() {
+        this.clearRestTimeout();
+        if (!this.restTimer) return;
+        const delay = Math.max(0, this.restTimer.endAt - Date.now());
+        this.restTimeout = setTimeout(() => {
+            this.restTimeout = null;
+            this.syncRestTimer();
+        }, delay);
+    },
+
+    clearRestTimeout() {
+        if (this.restTimeout) {
+            clearTimeout(this.restTimeout);
+            this.restTimeout = null;
+        }
+    },
+
     clearRestInterval() {
+        this.clearRestTimeout();
         if (this.restInterval) {
             clearInterval(this.restInterval);
             this.restInterval = null;
@@ -447,6 +474,7 @@ const Workout = {
             this.completeRestTimer();
         } else {
             this.ensureRestInterval();
+            this.armRestTimeout();
             this.renderRestTimerUI();
         }
     },

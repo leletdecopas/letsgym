@@ -1,4 +1,4 @@
-const CACHE_NAME = 'letsgym-v11';
+const CACHE_NAME = 'letsgym-v12';
 const urlsToCache = [
     './',
     './index.html',

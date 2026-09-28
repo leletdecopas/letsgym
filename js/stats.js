@@ -6,7 +6,10 @@ const Stats = {
     KCAL_PER_KG: 0.05,
     DAY_LETTERS: ['D', 'S', 'T', 'Q', 'Q', 'S', 'S'],
     DAY_NAMES: ['Domingo', 'Segunda', 'Terca', 'Quarta', 'Quinta', 'Sexta', 'Sabado'],
+    MONTH_NAMES: ['janeiro', 'fevereiro', 'marco', 'abril', 'maio', 'junho',
+                  'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'],
     pendingGoal: null,
+    calendarOffset: 0,
 
     init() {
         const select = document.getElementById('stats-exercise-select');
@@ -269,6 +272,87 @@ const Stats = {
         }
     },
 
+    /* ---------- Calendario mensal (aba Estatisticas) ---------- */
+
+    getCalendarRef() {
+        const now = new Date();
+        return new Date(now.getFullYear(), now.getMonth() + this.calendarOffset, 1);
+    },
+
+    getTrainedDaysInMonth(ref) {
+        const { start, end } = this.getMonthRange(ref);
+        const days = new Set();
+        this.getEntriesIn(start, end).forEach(entry => {
+            days.add(new Date(entry.date).getDate());
+        });
+        return days;
+    },
+
+    calendarHTML() {
+        const ref = this.getCalendarRef();
+        const now = new Date();
+        const isCurrentMonth = ref.getFullYear() === now.getFullYear() && ref.getMonth() === now.getMonth();
+        const trained = this.getTrainedDaysInMonth(ref);
+        const count = this.countWorkouts(this.getMonthRange(ref));
+        const firstWeekday = ref.getDay();
+        const daysInMonth = new Date(ref.getFullYear(), ref.getMonth() + 1, 0).getDate();
+        const today = isCurrentMonth ? now.getDate() : -1;
+
+        const prevDisabled = this.calendarOffset <= -12;
+        const nextDisabled = isCurrentMonth;
+
+        const cells = [];
+        for (let i = 0; i < firstWeekday; i++) {
+            cells.push('<span class="cal-day cal-empty"></span>');
+        }
+        for (let d = 1; d <= daysInMonth; d++) {
+            const classes = ['cal-day'];
+            if (trained.has(d)) classes.push('trained');
+            if (d === today) classes.push('today');
+            const label = trained.has(d)
+                ? `${d} de ${this.MONTH_NAMES[ref.getMonth()]}: treino`
+                : `${d} de ${this.MONTH_NAMES[ref.getMonth()]}`;
+            cells.push(`<span class="${classes.join(' ')}" title="${label}">${d}</span>`);
+        }
+
+        const weekdays = this.DAY_LETTERS
+            .map((letter, i) => `<span class="cal-weekday" title="${this.DAY_NAMES[i]}">${letter}</span>`)
+            .join('');
+
+        const summary = count === 0
+            ? 'Nenhum treino neste mes'
+            : `${count} treino${count > 1 ? 's' : ''} em ${trained.size} dia${trained.size > 1 ? 's' : ''}`;
+
+        return `
+            <div class="cal-head">
+                <button type="button" class="cal-nav" data-cal-nav="-1" ${prevDisabled ? 'disabled' : ''} title="Mes anterior">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                </button>
+                <span class="cal-title">${this.MONTH_NAMES[ref.getMonth()]} <span class="cal-year">${ref.getFullYear()}</span></span>
+                <button type="button" class="cal-nav" data-cal-nav="1" ${nextDisabled ? 'disabled' : ''} title="Proximo mes">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                </button>
+            </div>
+            <div class="cal-weekdays">${weekdays}</div>
+            <div class="cal-grid">${cells.join('')}</div>
+            <div class="cal-summary">${summary}</div>
+        `;
+    },
+
+    renderCalendar() {
+        const container = document.getElementById('stats-calendar');
+        if (!container) return;
+
+        container.innerHTML = this.calendarHTML();
+
+        container.querySelectorAll('[data-cal-nav]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                this.calendarOffset += parseInt(btn.getAttribute('data-cal-nav'), 10);
+                this.renderCalendar();
+            });
+        });
+    },
+
     /* ---------- Modal de meta ---------- */
 
     showGoalModal() {
@@ -315,16 +399,17 @@ const Stats = {
         const { kcal } = this.estimateKcal(monthRange);
 
         const items = [
-            { value: history.length, label: 'Total de treinos' },
-            { value: this.countWorkouts(monthRange), label: 'Treinos no mes' },
-            { value: this.countWorkouts(weekRange), label: 'Treinos na semana' },
-            { value: this.countPRs(monthRange), label: 'Recordes no mes' },
-            { value: favorite ? favorite.label : '-', label: 'Musculo favorito', text: true },
-            { value: history.length ? `~${this.formatKcal(kcal)}` : '-', label: 'Kcal no mes (estim.)', text: true }
+            { value: history.length, label: 'Total de treinos', icon: 'dumbbell', tone: 'accent' },
+            { value: this.countWorkouts(monthRange), label: 'Treinos no mes', icon: 'calendar', tone: 'accent' },
+            { value: this.countWorkouts(weekRange), label: 'Treinos na semana', icon: 'calendarCheck', tone: 'accent' },
+            { value: this.countPRs(monthRange), label: 'Recordes no mes', icon: 'trophy', tone: 'trophy' },
+            { value: favorite ? favorite.label : '-', label: 'Musculo favorito', text: true, icon: 'activity', tone: 'info' },
+            { value: history.length ? `~${this.formatKcal(kcal)}` : '-', label: 'Kcal no mes (estim.)', text: true, icon: 'flame', tone: 'success' }
         ];
 
         kpis.innerHTML = items.map(item => `
-            <div class="exercise-stat">
+            <div class="exercise-stat tone-${item.tone}">
+                <span class="exercise-stat-icon">${this.kpiIcon(item.icon)}</span>
                 <div class="exercise-stat-value${item.text ? ' stat-text' : ''}">${item.value}</div>
                 <div class="exercise-stat-label">${item.label}</div>
             </div>
@@ -334,11 +419,26 @@ const Stats = {
         this.renderProgressChart();
         this.renderMuscleBars();
         this.renderStreaks();
+        this.calendarOffset = 0;
+        this.renderCalendar();
     },
 
     formatKcal(value) {
         const rounded = Math.max(0, Math.round(value / 5) * 5);
         return rounded.toLocaleString('pt-BR');
+    },
+
+    kpiIcon(name) {
+        const paths = {
+            dumbbell: '<path d="M6.5 6.5v11"></path><path d="M17.5 6.5v11"></path><path d="M3 9.5v5"></path><path d="M21 9.5v5"></path><path d="M6.5 12h11"></path>',
+            calendar: '<rect x="3" y="5" width="18" height="16" rx="2"></rect><path d="M16 3v4"></path><path d="M8 3v4"></path><path d="M3 10h18"></path>',
+            calendarCheck: '<rect x="3" y="5" width="18" height="16" rx="2"></rect><path d="M16 3v4"></path><path d="M8 3v4"></path><path d="M3 10h18"></path><path d="m9 15.5 2 2 4-4"></path>',
+            trophy: '<path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path><path d="M4 22h16"></path><path d="M10 14.6V17c0 .6-.5 1-1 1.2C7.9 18.8 7 20.2 7 22"></path><path d="M14 14.6V17c0 .6.5 1 1 1.2 1.1.6 2 2 2 3.8"></path><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"></path>',
+            activity: '<path d="M22 12h-4l-3 9L9 3l-3 9H2"></path>',
+            flame: '<path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.4-.5-2-1-3-1.1-2.1-.2-4 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.2.4-2.3 1-3a2.5 2.5 0 0 0 2.5 2.5Z"></path>'
+        };
+        const body = paths[name] || '';
+        return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${body}</svg>`;
     },
 
     renderWeeklyChart() {

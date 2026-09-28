@@ -643,23 +643,79 @@ body {
 }
 
 .exercise-stat {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.35rem;
+    overflow: hidden;
     text-align: center;
-    padding: 0.75rem 0.5rem;
-    background: var(--bg-base);
-    border-radius: var(--radius);
+    padding: 0.85rem 0.5rem 0.75rem;
+    background: var(--bg-card);
+    border-radius: var(--radius-lg);
     border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+}
+
+.exercise-stat::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 55%;
+    background: linear-gradient(180deg, var(--stat-soft, transparent), transparent);
+    pointer-events: none;
+}
+
+.exercise-stat.tone-accent {
+    --stat-c: var(--accent);
+    --stat-soft: var(--accent-soft);
+}
+
+.exercise-stat.tone-trophy {
+    --stat-c: var(--trophy);
+    --stat-soft: var(--trophy-soft);
+}
+
+.exercise-stat.tone-info {
+    --stat-c: var(--map-highlight);
+    --stat-soft: rgba(17, 119, 222, 0.12);
+}
+
+.exercise-stat.tone-success {
+    --stat-c: var(--success);
+    --stat-soft: var(--success-soft);
+}
+
+.exercise-stat-icon {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    background: var(--stat-soft);
+    border-radius: 50%;
+    color: var(--stat-c);
+}
+
+.exercise-stat-icon svg {
+    width: 15px;
+    height: 15px;
 }
 
 .exercise-stat-value {
+    position: relative;
     font-size: 1.3rem;
     font-weight: 800;
-    color: var(--text-primary);
+    color: var(--stat-c, var(--text-primary));
     font-variant-numeric: tabular-nums;
     line-height: 1;
-    margin-bottom: 0.25rem;
 }
 
 .exercise-stat-label {
+    position: relative;
     font-size: 0.65rem;
     font-weight: 600;
     color: var(--text-muted);
@@ -1668,6 +1724,20 @@ body {
 
     .exercise-stat-value {
         font-size: 1.1rem;
+    }
+
+    .exercise-stat {
+        padding: 0.7rem 0.35rem 0.6rem;
+    }
+
+    .exercise-stat-icon {
+        width: 24px;
+        height: 24px;
+    }
+
+    .exercise-stat-icon svg {
+        width: 13px;
+        height: 13px;
     }
 }
 
@@ -2798,6 +2868,129 @@ button:focus-visible,
 }
 
 /* ============================================
+   CALENDARIO MENSAL (ABA ESTATISTICAS)
+   ============================================ */
+.cal-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.75rem;
+}
+
+.cal-nav {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    background: var(--bg-base);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.cal-nav svg {
+    width: 16px;
+    height: 16px;
+}
+
+.cal-nav:hover:not(:disabled) {
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+.cal-nav:disabled {
+    opacity: 0.35;
+    cursor: default;
+}
+
+.cal-title {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    text-transform: capitalize;
+}
+
+.cal-year {
+    font-weight: 600;
+    color: var(--text-muted);
+}
+
+.cal-weekdays,
+.cal-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 0.35rem;
+}
+
+.cal-weekdays {
+    margin-bottom: 0.35rem;
+}
+
+.cal-weekday {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 20px;
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--text-muted);
+}
+
+.cal-grid {
+    margin-bottom: 0.75rem;
+}
+
+.cal-day {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 34px;
+    background: var(--bg-base);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    transition: var(--transition);
+}
+
+.cal-day.cal-empty {
+    background: transparent;
+    border-color: transparent;
+}
+
+.cal-day.trained {
+    background: var(--accent-soft);
+    border-color: rgba(255, 107, 53, 0.5);
+    color: var(--accent);
+}
+
+.cal-day.today {
+    border-color: var(--text-muted);
+    color: var(--text-secondary);
+}
+
+.cal-day.today.trained {
+    border-color: var(--accent);
+    color: var(--accent);
+    box-shadow: 0 0 0 1px var(--accent);
+}
+
+.cal-summary {
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-muted);
+    text-align: center;
+}
+
+/* ============================================
    STREAK NA TELA DE TREINO CONCLUIDO
    ============================================ */
 .complete-week {
@@ -2867,6 +3060,10 @@ button:focus-visible,
 
 .stats-section {
     margin-bottom: 1.75rem;
+}
+
+.stats-section .streak-card {
+    margin-bottom: 0;
 }
 
 .section-hint {

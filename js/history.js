@@ -210,12 +210,12 @@ const History = {
             (entry.exercises || []).forEach(ex => {
                 const max = Storage.getExerciseMaxWeight(ex, true);
                 if (max <= 0) return;
-                const nameKey = String(ex.name || '').toLowerCase().trim();
+                const nameKey = Storage.nameKey(ex.name);
                 const prev = bests[nameKey] || 0;
                 const entryKey = (entry.id || '') + ':' + ex.name;
-                if (max > prev) {
+                if (max > prev) bests[nameKey] = max;
+                if (prev > 0 && max > prev) {
                     keys.add(entryKey);
-                    bests[nameKey] = max;
                 }
             });
         });

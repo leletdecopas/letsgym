@@ -312,12 +312,22 @@ const Storage = {
         return 0;
     },
 
+    nameKey(str) {
+        return String(str == null ? '' : str)
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .toLowerCase()
+            .trim()
+            .replace(/\s+/g, ' ');
+    },
+
     getBestWeight(exerciseName) {
-        const name = String(exerciseName || '').toLowerCase().trim();
+        const name = this.nameKey(exerciseName);
+        if (!name) return 0;
         let best = 0;
         this.getHistory().forEach(entry => {
             (entry.exercises || []).forEach(ex => {
-                if (String(ex.name || '').toLowerCase().trim() !== name) return;
+                if (this.nameKey(ex.name) !== name) return;
                 const max = this.getExerciseMaxWeight(ex, true);
                 if (max > best) best = max;
             });
@@ -331,7 +341,7 @@ const Storage = {
             const current = this.getExerciseMaxWeight(ex, true);
             if (current <= 0) return;
             const previous = this.getBestWeight(ex.name);
-            if (current > previous) {
+            if (previous > 0 && current > previous) {
                 prs.push({
                     name: ex.name,
                     weight: current,

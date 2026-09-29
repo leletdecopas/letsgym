@@ -170,24 +170,26 @@ const Stats = {
     },
 
     getExerciseNames() {
-        const names = new Set();
+        const byKey = new Map();
         Storage.getHistory().forEach(entry => {
             (entry.exercises || []).forEach(ex => {
-                if (ex && ex.name) names.add(ex.name);
+                if (!ex || !ex.name) return;
+                const key = Storage.nameKey(ex.name);
+                if (key && !byKey.has(key)) byKey.set(key, ex.name);
             });
         });
-        return Array.from(names).sort((a, b) => a.localeCompare(b, 'pt-BR'));
+        return Array.from(byKey.values()).sort((a, b) => a.localeCompare(b, 'pt-BR'));
     },
 
     getExerciseProgress(name) {
-        const key = String(name || '').toLowerCase().trim();
+        const key = Storage.nameKey(name);
         const entries = [...Storage.getHistory()].sort((a, b) => new Date(a.date) - new Date(b.date));
         const points = [];
 
         entries.forEach(entry => {
             let max = 0;
             (entry.exercises || []).forEach(ex => {
-                if (String(ex.name || '').toLowerCase().trim() !== key) return;
+                if (Storage.nameKey(ex.name) !== key) return;
                 const weight = Storage.getExerciseMaxWeight(ex, true);
                 if (weight > max) max = weight;
             });

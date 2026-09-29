@@ -90,6 +90,10 @@ const Workout = {
         document.getElementById('exercise-modal').addEventListener('click', (e) => {
             if (e.target.id === 'exercise-modal') this.hideExerciseModal();
         });
+        document.getElementById('exercise-name').addEventListener('change', () => {
+            const muscle = this.resolveMuscleForName(document.getElementById('exercise-name').value);
+            if (muscle) document.getElementById('exercise-muscle').value = muscle;
+        });
         document.getElementById('finish-modal').addEventListener('click', (e) => {
             if (e.target.id === 'finish-modal') this.hideFinishModal();
         });
@@ -283,16 +287,14 @@ const Workout = {
         const totalCount = exercise.sets.length;
         const bestWeight = Storage.getExerciseMaxWeight(exercise, true);
         const previousBest = Storage.getBestWeight(exercise.name);
-        const isPR = bestWeight > 0 && bestWeight > previousBest;
+        const isPR = previousBest > 0 && bestWeight > previousBest;
         const prDelta = isPR ? Math.round((bestWeight - previousBest) * 100) / 100 : 0;
         return { completedCount, totalCount, bestWeight, previousBest, isPR, prDelta };
     },
 
     getTrophyHTML(prInfo) {
         if (!prInfo.isPR) return '';
-        const title = prInfo.previousBest > 0
-            ? `Novo recorde! +${prInfo.prDelta}kg vs anterior`
-            : `Primeiro recorde! ${prInfo.bestWeight}kg`;
+        const title = `Novo recorde! +${prInfo.prDelta}kg vs anterior`;
         return `
             <span class="pr-trophy" title="${title}">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -711,10 +713,66 @@ const Workout = {
     },
 
     // Exercise Modal
+    getKnownExerciseNames() {
+        const byKey = new Map();
+        const add = (name) => {
+            const key = Storage.nameKey(name);
+            if (key && !byKey.has(key)) byKey.set(key, String(name).trim());
+        };
+
+        if (typeof ExerciseCatalog !== 'undefined') {
+            ExerciseCatalog.forEach(ex => add(ex.name));
+        }
+        Storage.getHistory().forEach(entry => {
+            (entry.exercises || []).forEach(ex => add(ex.name));
+        });
+        Storage.getWorkouts().forEach(workout => {
+            Storage.getExercises(workout.id).forEach(ex => add(ex.name));
+        });
+
+        return Array.from(byKey.values()).sort((a, b) => a.localeCompare(b, 'pt-BR'));
+    },
+
+    resolveMuscleForName(name) {
+        const key = Storage.nameKey(name);
+        if (!key) return null;
+
+        const findIn = (list) => {
+            for (const ex of list) {
+                if (ex && Storage.nameKey(ex.name) === key && ex.muscle) return ex.muscle;
+            }
+            return null;
+        };
+
+        for (const entry of Storage.getHistory()) {
+            const muscle = findIn(entry.exercises || []);
+            if (muscle) return muscle;
+        }
+        for (const workout of Storage.getWorkouts()) {
+            const muscle = findIn(Storage.getExercises(workout.id));
+            if (muscle) return muscle;
+        }
+        if (typeof ExerciseCatalog !== 'undefined') {
+            const catalog = ExerciseCatalog.find(ex => Storage.nameKey(ex.name) === key);
+            if (catalog) return catalog.muscle;
+        }
+        return null;
+    },
+
     showExerciseModal(exerciseId = null) {
         this.editingExerciseId = exerciseId;
         const modal = document.getElementById('exercise-modal');
         const title = document.getElementById('modal-title');
+
+        const datalist = document.getElementById('exercise-options');
+        if (datalist) {
+            datalist.innerHTML = '';
+            this.getKnownExerciseNames().forEach(name => {
+                const option = document.createElement('option');
+                option.value = name;
+                datalist.appendChild(option);
+            });
+        }
 
         if (exerciseId) {
             title.textContent = 'Editar Exercicio';
@@ -895,7 +953,7 @@ const Workout = {
                         <path d="M17 5h2a2 2 0 0 1 0 4h-2M7 5H5a2 2 0 0 0 0 4h2"></path>
                     </svg>
                     <span class="pr-item-name">${pr.name}</span>
-                    <span class="pr-item-weight">${pr.weight}kg ${pr.previous > 0 ? `<span class="pr-item-delta">+${pr.delta}kg</span>` : '<span class="pr-item-delta">novo!</span>'}</span>
+                    <span class="pr-item-weight">${pr.weight}kg <span class="pr-item-delta">+${pr.delta}kg</span></span>
                 </div>
             `).join('');
             prContainer.classList.remove('hidden');

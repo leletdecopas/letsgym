@@ -1,8 +1,9 @@
-const CACHE_NAME = 'letsgym-v15';
+const CACHE_NAME = 'letsgym-v16';
 const urlsToCache = [
     './',
     './index.html',
     './css/style.css',
+    './icons/panther.png',
     './js/storage.js',
     './js/exerciseCatalog.js',
     './js/bodyPaths.js',
@@ -16,6 +17,8 @@ const urlsToCache = [
     './icons/apple-touch-icon.png',
     './icons/icon-192.png',
     './icons/icon-512.png',
+    './icons/icon-maskable-192.png',
+    './icons/icon-maskable-512.png',
     './icons/favicon-32.png'
 ];
 
